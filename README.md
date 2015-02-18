@@ -4,7 +4,7 @@ Nine.Injection is a portable lightweight constructor injection library for singl
 ## Highlights
 - **Portable:** Runs on Windows, Windows Phone 8, Windows Store, iOS, Android, etc.
 - **Always Singleton:** Objects registered and resolved by the container are always singletons.
-- **Inject by Constructor:** Objects are injected by constructors only.
+- **Constructor Injection:** Dependencies are expressed and injected by constructors only.
 
 ## Installation
 You can get Nine.Injection using NuGet:
@@ -12,7 +12,7 @@ You can get Nine.Injection using NuGet:
 Install-Package Nine.Injection
 ```
 ## Getting Started
-Dependencies are maintained by the ``Container``:
+Dependencies are maintained by the ``Container``
 ```c#
 var container = new Container();
 ```
@@ -30,13 +30,17 @@ container.MapAll<IFoo>(Assembly.GetExecutingAssembly());
 ```
 To get the concrete implementation of an interface:
 ```c#
-// Returns the last registered instance or type
-container.Get<IFoo>();
+container.Get<IFoo>();// Returns the last registered IFoo instance
 ```
 To get all implementations that implements an interface:
 ```c#
-// Returns an array of instances that implements IFoo
-container.GetAll<IFoo>(); 
+container.GetAll<IFoo>(); // Returns all instances that implements IFoo
+```
+Objects get from the container are always singletons:
+```c#
+container.Map<IFoo, Foo>().Map<IFoo2, Foo>();
+Assert.Equals(container.Get<IFoo>(), container.Get<IFoo>());
+Assert.Equals(container.Get<IFoo>(), container.Get<IFoo2>());
 ```
 ## Expressing Dependencies
 Nine.Injection uses constructors to find dependencies:
@@ -48,7 +52,7 @@ public class UserService : IService
 ```
 To instantiate `UserService`, a `IStorage` is resolved from the container and passed to the constructor of `UserService`.
 
-If there are multiple arguments specified in the constructor, the one with the biggest number of arguments is used:
+If there are multiple arguments specified in the constructor, the one with the most arguments is used:
 ```c#
 public UserService(IStorage storage)
 public UserService(IStorage storage, ILogger logger) // <- picked
