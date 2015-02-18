@@ -1,4 +1,4 @@
-﻿namespace Nine.Ioc
+﻿namespace Nine.Injection
 {
     using System;
     using System.Collections;

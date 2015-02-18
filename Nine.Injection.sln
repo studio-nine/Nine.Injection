@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22512.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nine.Ioc", "src\Nine.Ioc.csproj", "{3CBE9E03-1968-4277-850D-70E944B1305D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nine.Injection", "src\Nine.Injection.csproj", "{3CBE9E03-1968-4277-850D-70E944B1305D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nine.Ioc.Test", "test\Nine.Ioc.Test.csproj", "{5B3F9589-BF9A-4D95-BC54-45FB727D7DEA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nine.Injection.Test", "test\Nine.Injection.Test.csproj", "{5B3F9589-BF9A-4D95-BC54-45FB727D7DEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

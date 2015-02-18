@@ -1,4 +1,4 @@
-﻿namespace Nine.Ioc
+﻿namespace Nine.Injection
 {
     public static class ContainerExtensions
     {

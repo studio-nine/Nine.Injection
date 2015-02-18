@@ -10,8 +10,8 @@
     <ProjectGuid>{5B3F9589-BF9A-4D95-BC54-45FB727D7DEA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Nine.Ioc.Test</RootNamespace>
-    <AssemblyName>Nine.Ioc.Test</AssemblyName>
+    <RootNamespace>Nine.Injection.Test</RootNamespace>
+    <AssemblyName>Nine.Injection.Test</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -42,9 +42,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Nine.Ioc.csproj">
+    <ProjectReference Include="..\src\Nine.Injection.csproj">
       <Project>{3cbe9e03-1968-4277-850d-70e944b1305d}</Project>
-      <Name>Nine.Ioc</Name>
+      <Name>Nine.Injection</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,2 +1,2 @@
-# Nine.Ioc
-A portable lightweight IoC container
+# Nine.Injection
+A portable lightweight constructor injection library for singleton objects

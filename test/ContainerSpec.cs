@@ -1,4 +1,4 @@
-﻿namespace Nine.Ioc.Test
+﻿namespace Nine.Injection.Test
 {
     using System.Linq;
     using Xunit;
