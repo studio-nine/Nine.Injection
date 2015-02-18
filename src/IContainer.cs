@@ -18,7 +18,7 @@
         /// <param name="type">The type of interface or class to be registered</param>
         /// <param name="instance">The instance to register in the container</param>
         /// <returns>The container, complete with new registration</returns>
-        void Add(Type type, object instance);
+        void Map(Type type, object instance);
 
         /// <summary>
         /// Try to resolve an instance of the specified interface (or class) Type

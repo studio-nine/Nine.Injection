@@ -17,11 +17,11 @@
             this.container = container;
         }
 
-        public void Add(Type type, object instance)
+        public void Map(Type type, object instance)
         {
             lock (syncRoot)
             {
-                container.Add(type, instance);
+                container.Map(type, instance);
             }
         }
 

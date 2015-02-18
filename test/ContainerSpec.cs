@@ -21,13 +21,13 @@
         [Fact]
         public void add_then_get_an_instance()
         {
-            Assert.IsType<Foo>(new Container().Add<IFoo>(new Foo()).Get<IFoo>());
+            Assert.IsType<Foo>(new Container().Map<IFoo>(new Foo()).Get<IFoo>());
         }
 
         [Fact]
         public void add_to_the_same_type_should_override()
         {
-            Assert.IsType<Foo2>(new Container().Add<IFoo>(new Foo2()).Get<IFoo>());
+            Assert.IsType<Foo2>(new Container().Map<IFoo>(new Foo2()).Get<IFoo>());
         }
 
         [Fact]
@@ -59,7 +59,7 @@
         [Fact]
         public void get_using_constructor_injection_with_registered_instance()
         {
-            Assert.IsType<Foo2>(new Container().Add<IFoo>(new Foo2()).Get<Bar>().Foo);
+            Assert.IsType<Foo2>(new Container().Map<IFoo>(new Foo2()).Get<Bar>().Foo);
         }
 
         [Fact]
@@ -98,7 +98,7 @@
         [Fact]
         public void get_all_returns_all_mapping_in_registration_order()
         {
-            var instance = new Container().Map<IFoo, Foo>().Add<IFoo>(new Foo2()).Add<IFoo>(new Foo()).GetAll<IFoo>();
+            var instance = new Container().Map<IFoo, Foo>().Map<IFoo>(new Foo2()).Map<IFoo>(new Foo()).GetAll<IFoo>();
             Assert.Collection(instance, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e), e => Assert.IsType<Foo>(e));
         }
 
@@ -107,7 +107,7 @@
         {
             var container = new Container().Map<IFoo, Foo>().Map<IFoo, Foo2>();
             var foo1 = container.GetAll<IFoo>();
-            var foo2 = container.Add<IFoo>(new Foo()).Map<IFoo, Foo2>().GetAll<IFoo>();
+            var foo2 = container.Map<IFoo>(new Foo()).Map<IFoo, Foo2>().GetAll<IFoo>();
             Assert.Collection(foo1, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
             Assert.Collection(foo2, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e), e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
         }

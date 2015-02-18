@@ -28,7 +28,7 @@
         }
 
         /// <inheritdoc />
-        public void Add(Type type, object instance)
+        public void Map(Type type, object instance)
         {
             if (type == null)
             {

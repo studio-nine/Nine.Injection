@@ -87,9 +87,9 @@
         /// <typeparam name="T">The type of interface or class to be registered</typeparam>
         /// <param name="instance">The instance to register in the container</param>
         /// <returns>The container, complete with new registration</returns>
-        public static IContainer Add<T>(this IContainer container, T instance)
+        public static IContainer Map<T>(this IContainer container, T instance)
         {
-            container.Add(typeof(T), instance);
+            container.Map(typeof(T), instance);
             return container;
         }
 
