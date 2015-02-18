@@ -1,7 +1,7 @@
 ﻿namespace Nine.Injection
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections;
 
     public interface IContainer
     {
@@ -32,6 +32,6 @@
         /// </summary>
         /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
         /// <returns>A collection of registered instances. If no instances are registered, returns empty collection, not null</returns>
-        IEnumerable<T> GetAll<T>() where T : class;
+        IEnumerable GetAll(Type type);
     }
 }

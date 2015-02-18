@@ -21,5 +21,8 @@
         /// Gets the type of concrete class to be instantiated when from is resolved from the container.
         /// </summary>
         public Type To { get; internal set; }
+
+        /// <inheritdoc />
+        public override string ToString() => $"{From} -> {To}";
     }
 }

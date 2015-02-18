@@ -9,6 +9,7 @@
     public class Container : IEnumerable<TypeMap>, IContainer
     {
         private readonly Dictionary<Type, List<TypeMap>> map = new Dictionary<Type, List<TypeMap>>();
+        private readonly List<Type> dependencyTracker = new List<Type>();
 
         /// <inheritdoc />
         public void Map(Type from, Type to)
@@ -46,11 +47,16 @@
         /// <inheritdoc />
         public object Get(Type type)
         {
-            var mappings = GetMappings(type);
+            dependencyTracker.Clear();
+            return GetCore(type);
+        }
 
+        private object GetCore(Type type)
+        {
+            var mappings = GetMappings(type);
             if (mappings.Count > 0)
             {
-                return Get(mappings[mappings.Count - 1]);
+                return GetOne(mappings[mappings.Count - 1]);
             }
 
             var instance = Instantiate(type);
@@ -61,18 +67,30 @@
             }
 
             mappings.Add(mapping);
-
             return instance;
         }
 
         /// <inheritdoc />
-        public IEnumerable<T> GetAll<T>() where T : class
+        public IEnumerable GetAll(Type type)
         {
-            var type = typeof(T);
-            var mapping = GetMappings(type);
+            dependencyTracker.Clear();
+            return GetAllCore(type);
+        }
 
-            //return mapping.Select(map => map.Value as T ?? Instantiate(map.To));
-            throw new NotImplementedException();
+        private IEnumerable GetAllCore(Type type)
+        {
+            List<TypeMap> mappings;
+            map.TryGetValue(type, out mappings);
+
+            IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
+            if (result.Count > 0)
+            {
+                for (var i = 0; i < mappings.Count; i++)
+                {
+                    result[i] = GetOne(mappings[i]);
+                }
+            }
+            return result;
         }
 
         private List<TypeMap> GetMappings(Type type)
@@ -85,19 +103,38 @@
             return result;
         }
 
-        private object Get(TypeMap map)
+        private object GetOne(TypeMap map)
         {
             if (map.HasValue)
             {
                 return map.Value;
             }
 
+            map.Value = Instantiate(map.To);
             map.HasValue = true;
-            return map.Value = Instantiate(map.To);
+
+            return map.Value;
         }
 
         private object Instantiate(Type type)
         {
+            if (dependencyTracker.Contains(type))
+            {
+                throw new ArgumentException($"Circular dependency detected while resolving type { type.FullName }.");
+            }
+
+            dependencyTracker.Add(type);
+
+            if (type.IsArray)
+            {
+                return GetAllCore(type.GetElementType());
+            }
+            
+            if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                return GetAllCore(type.GenericTypeArguments[0]);
+            }
+
             ConstructorInfo constructor = null;
             ParameterInfo[] parameters = null;
 
@@ -127,7 +164,7 @@
             var constructorParams = new object[parameters.Length];
             for (var i = 0; i < parameters.Length; i++)
             {
-                constructorParams[i] = Get(parameters[i].ParameterType);
+                constructorParams[i] = GetCore(parameters[i].ParameterType);
             }
 
             return constructor.Invoke(constructorParams);

@@ -1,6 +1,6 @@
 ﻿namespace Nine.Injection.Test
 {
-    using System.Linq;
+    using System;
     using Xunit;
 
     public class ContainerSpec
@@ -67,6 +67,47 @@
             var instance = new Container().Map<IFirst, First>().Map<ISecond, Second>().Get<Overloaded>();
             Assert.IsType<First>(instance.First);
             Assert.IsType<Second>(instance.Second);
+        }
+
+        [Fact]
+        public void get_should_throw_on_circular_dependency()
+        {
+            Assert.Throws<ArgumentException>(() => new Container().Map<IPing, Ping>().Map<IPong, Pong>().Get<IPing>());
+        }
+
+        [Fact]
+        public void get_all_returns_all_mapping_in_registration_order()
+        {
+            var instance = new Container().Map<IFoo, Foo>().Add<IFoo>(new Foo2()).Add<IFoo>(new Foo()).GetAll<IFoo>();
+            Assert.Collection(instance, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e), e => Assert.IsType<Foo>(e));
+        }
+
+        [Fact]
+        public void get_all_should_return_updated_collection()
+        {
+            var container = new Container().Map<IFoo, Foo>().Map<IFoo, Foo2>();
+            var foo1 = container.GetAll<IFoo>();
+            var foo2 = container.Add<IFoo>(new Foo()).Map<IFoo, Foo2>().GetAll<IFoo>();
+            Assert.Collection(foo1, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
+            Assert.Collection(foo2, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e), e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
+        }
+
+        [Fact]
+        public void get_should_inject_array_constructor_parameter()
+        {
+            var instance = new Container().Map<IFoo, Foo>().Map<IFoo, Foo2>().Get<ArrayConstructor>();
+            Assert.NotNull(instance);
+            Assert.IsType<Foo2>(instance.Foo);
+            Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
+        }
+
+        [Fact]
+        public void get_should_inject_enumerable_constructor_parameter()
+        {
+            var instance = new Container().Map<IFoo, Foo>().Map<IFoo, Foo2>().Get<EnumerableConstructor>();
+            Assert.NotNull(instance);
+            Assert.IsType<Foo2>(instance.Foo);
+            Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
         }
     }
 }
