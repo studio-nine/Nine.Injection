@@ -3,6 +3,7 @@
 *.suo
 *.user
 *.ide
+*.exe
 
 /**/bin
 /**/obj
