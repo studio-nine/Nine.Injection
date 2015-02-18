@@ -30,7 +30,7 @@ container.MapAll<IFoo>(Assembly.GetExecutingAssembly());
 ```
 To get the concrete implementation of an interface:
 ```c#
-container.Get<IFoo>();// Returns the last registered IFoo instance
+container.Get<IFoo>(); // Returns the last registered IFoo instance
 ```
 To get all implementations that implements an interface:
 ```c#
@@ -55,7 +55,7 @@ To instantiate `UserService`, a `IStorage` is resolved from the container and pa
 If there are multiple arguments specified in the constructor, the one with the most arguments is used:
 ```c#
 public UserService(IStorage storage)
-public UserService(IStorage storage, ILogger logger) // <- picked
+public UserService(IStorage storage, ILogger logger) // This one is used
 ```
 To inject all implementations of a given interface:
 ```c#
