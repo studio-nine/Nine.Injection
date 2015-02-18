@@ -1,6 +1,7 @@
 ﻿namespace Nine.Injection.Test
 {
     using System;
+    using System.Reflection;
     using Xunit;
 
     public class ContainerSpec
@@ -73,6 +74,25 @@
         public void get_should_throw_on_circular_dependency()
         {
             Assert.Throws<ArgumentException>(() => new Container().Map<IPing, Ping>().Map<IPong, Pong>().Get<IPing>());
+        }
+
+        [Fact]
+        public void lazy_can_resolve_circular_dependency()
+        {
+            var ping = new Container().Map<IPing, Ping>().Map<IPong, Pong2>().Get<IPing>();
+            Assert.Equal(ping, ping.Pong.Ping);
+        }
+
+        [Fact]
+        public void resolve_lazy_within_constructor_should_throw_on_circular_dependency()
+        {
+            Assert.Throws<TargetInvocationException>(() => new Container().Map<IPing, Ping>().Map<IPong, Pong3>().Get<IPing>());
+        }
+
+        [Fact]
+        public void resolve_lazy_within_constructor_should_not_throw()
+        {
+            Assert.IsType<Foo>(new Container().Map<IFoo, Foo>().Get<Bar2>().Foo);
         }
 
         [Fact]

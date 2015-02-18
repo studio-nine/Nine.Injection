@@ -1,5 +1,6 @@
 ﻿namespace Nine.Injection.Test
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -12,6 +13,12 @@
     {
         public IFoo Foo { get; private set; }
         public Bar(IFoo foo) { this.Foo = foo; }
+    }
+
+    class Bar2
+    {
+        public IFoo Foo { get; private set; }
+        public Bar2(Lazy<IFoo> foo) { this.Foo = foo.Value; }
     }
 
     interface IFirst { }
@@ -44,9 +51,38 @@
         public EnumerableConstructor(IFoo foo, IEnumerable<IFoo> foos) { this.Foo = foo; this.Foos = foos.ToArray(); }
     }
 
-    interface IPing { }
-    class Ping : IPing { public Ping(IPong pong) { } }
+    interface IPing
+    {
+        IPong Pong { get; }
+    }
 
-    interface IPong { }
-    class Pong : IPong { public Pong(IPing ping) { } }
+    class Ping : IPing
+    {
+        public IPong Pong { get; private set; }
+        public Ping(IPong pong) { Pong = pong; }
+    }
+
+    interface IPong
+    {
+        IPing Ping { get; }
+    }
+
+    class Pong : IPong
+    {
+        public IPing Ping { get { return null; } }
+        public Pong(IPing ping) { }
+    }
+
+    class Pong2 : IPong
+    {
+        Lazy<IPing> ping;
+        public IPing Ping { get { return ping.Value; } }
+        public Pong2(Lazy<IPing> ping) { this.ping = ping; }
+    }
+
+    class Pong3 : IPong
+    {
+        public IPing Ping { get; private set; }
+        public Pong3(Lazy<IPing> ping) { this.Ping = ping.Value; }
+    }
 }

@@ -70,6 +70,21 @@
             return instance;
         }
 
+        private Func<T> GetCoreGeneric<T>()
+        {
+            return new Func<T>(() => (T)GetCore(typeof(T)));
+        }
+
+        private static MethodInfo getCoreMethod;
+        private static MethodInfo GetCoreMethod(Type type)
+        {
+            if (getCoreMethod == null)
+            {
+                getCoreMethod = typeof(Container).GetRuntimeMethods().First(m => m.Name == "GetCoreGeneric");
+            }
+            return getCoreMethod.MakeGenericMethod(type);
+        }
+
         /// <inheritdoc />
         public IEnumerable GetAll(Type type)
         {
@@ -125,14 +140,36 @@
 
             dependencyTracker.Add(type);
 
+            try
+            {
+                return InstantiateCore(type);
+            }
+            finally
+            {
+                dependencyTracker.Remove(type);
+            }
+        }
+
+        private object InstantiateCore(Type type)
+        {
             if (type.IsArray)
             {
                 return GetAllCore(type.GetElementType());
             }
-            
-            if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+
+            if (type.IsConstructedGenericType)
             {
-                return GetAllCore(type.GenericTypeArguments[0]);
+                var definition = type.GetGenericTypeDefinition();
+                if (definition == typeof(IEnumerable<>))
+                {
+                    return GetAllCore(type.GenericTypeArguments[0]);
+                }
+
+                if (definition == typeof(Lazy<>))
+                {
+                    var func = GetCoreMethod(type.GenericTypeArguments[0]).Invoke(this, null);
+                    return Activator.CreateInstance(type, func, false);
+                }
             }
 
             ConstructorInfo constructor = null;
