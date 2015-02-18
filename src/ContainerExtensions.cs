@@ -1,7 +1,9 @@
 ﻿namespace Nine.Injection
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Reflection;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ContainerExtensions
@@ -27,6 +29,56 @@
         {
             container.Map(typeof(TFrom), typeof(TTo));
             return container;
+        }
+
+        /// <summary>
+        ///  Map all exported types in the assemblies that implements T or derives from T.
+        /// </summary>
+        /// <returns>The container, complete with new registration</returns>
+        public static IContainer MapAll<T>(this IContainer container, params Assembly[] assemblies)
+        {
+            IEnumerable<Type> exportedTypes = null;
+
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    exportedTypes = assembly.ExportedTypes;
+                }
+                catch (ReflectionTypeLoadException)
+                {
+                    continue;
+                }
+
+                MapAll<T>(container, exportedTypes);
+            }
+
+            return container;
+        }
+
+        /// <summary>
+        ///  Map all types that implements T or derives from T.
+        /// </summary>
+        /// <returns>The container, complete with new registration</returns>
+        public static IContainer MapAll<T>(this IContainer container, IEnumerable<Type> types)
+        {
+            var ti = typeof(T).GetTypeInfo();
+
+            foreach (var type in types)
+            {
+                var info = type.GetTypeInfo();
+                if (IsTypeInjectible(info) && ti.IsAssignableFrom(info))
+                {
+                    container.Map(typeof(T), type);
+                }
+            }
+
+            return container;
+        }
+
+        private static bool IsTypeInjectible(TypeInfo type)
+        {
+            return type.IsClass && type.IsVisible && !type.IsAbstract && !type.IsGenericType && !type.IsGenericTypeDefinition;
         }
 
         /// <summary>
