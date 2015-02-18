@@ -1,7 +1,9 @@
 ﻿namespace Nine.Injection
 {
     using System.Collections.Generic;
+    using System.ComponentModel;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ContainerExtensions
     {
         /// <summary>
@@ -57,6 +59,14 @@
         public static IEnumerable<T> GetAll<T>(this IContainer container)
         {
             return (IEnumerable<T>)container.GetAll(typeof(T));
+        }
+
+        /// <summary>
+        /// Make the container synchronized.
+        /// </summary>
+        public static IContainer Synchronized(this IContainer container)
+        {
+            return new SynchronizedContainer(container);
         }
     }
 }

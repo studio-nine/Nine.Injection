@@ -168,7 +168,7 @@
                 if (definition == typeof(Lazy<>))
                 {
                     var func = GetCoreMethod(type.GenericTypeArguments[0]).Invoke(this, null);
-                    return Activator.CreateInstance(type, func, false);
+                    return Activator.CreateInstance(type, func, true);
                 }
             }
 
