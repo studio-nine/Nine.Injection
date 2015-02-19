@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Linq;
     using System.Reflection;
 
     /// <summary>
@@ -70,7 +71,7 @@
             foreach (var type in types)
             {
                 var info = type.GetTypeInfo();
-                if (IsTypeInjectible(info) && ti.IsAssignableFrom(info))
+                if (IsInjectible(info) && ti.IsAssignableFrom(info))
                 {
                     container.Map(typeof(T), type);
                 }
@@ -79,9 +80,37 @@
             return container;
         }
 
-        private static bool IsTypeInjectible(TypeInfo type)
+        /// <summary>
+        /// Determines if the given type can be injected by the container.
+        /// </summary>
+        /// <param name="type">The type</param>
+        /// <returns>True if the type can be injected, otherwise false</returns>
+        public static bool IsInjectible(Type type)
         {
-            return type.IsClass && type.IsVisible && !type.IsAbstract && !type.IsGenericType && !type.IsGenericTypeDefinition;
+            return IsInjectible(type.GetTypeInfo());
+        }
+
+        private static bool IsInjectible(TypeInfo type)
+        {
+            // Needs to be a public concrete class
+            if (!type.IsClass || !type.IsPublic || !type.IsVisible || type.IsAbstract || type.IsValueType)
+            {
+                return false;
+            }
+
+            // Cannot be generic
+            if (type.IsGenericType || type.IsGenericTypeDefinition)
+            {
+                return false;
+            }
+
+            // Should have at least one public constructor
+            if (!type.DeclaredConstructors.Any(constructor => constructor.IsPublic))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
