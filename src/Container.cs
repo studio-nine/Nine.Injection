@@ -11,7 +11,7 @@
     /// </summary>
     public class Container : IContainer
     {
-        private readonly Dictionary<Type, List<TypeMap>> map = new Dictionary<Type, List<TypeMap>>();
+        private readonly Dictionary<Type, List<TypeMap>> mappings = new Dictionary<Type, List<TypeMap>>();
         private readonly List<Type> dependencyTracker = new List<Type>();
 
         /// <summary>
@@ -19,7 +19,7 @@
         /// </summary>
         public IEnumerable<TypeMap> Mappings
         {
-            get { return map.SelectMany(m => m.Value).Where(m => m.To != null); }
+            get { return mappings.SelectMany(m => m.Value).Where(m => m.To != null); }
         }
 
         /// <inheritdoc />
@@ -81,6 +81,16 @@
             return instance;
         }
 
+        private object GetOne(TypeMap map)
+        {
+            if (map.HasValue)
+            {
+                return map.Value;
+            }
+
+            return GetCore(map.To);
+        }
+
         private Func<T> GetCoreGeneric<T>()
         {
             return new Func<T>(() => (T)GetCore(typeof(T)));
@@ -106,7 +116,7 @@
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
-            map.TryGetValue(type, out mappings);
+            this.mappings.TryGetValue(type, out mappings);
 
             IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
             if (result.Count > 0)
@@ -122,24 +132,11 @@
         private List<TypeMap> GetMappings(Type type)
         {
             List<TypeMap> result;
-            if (!map.TryGetValue(type, out result))
+            if (!mappings.TryGetValue(type, out result))
             {
-                map.Add(type, result = new List<TypeMap>());
+                mappings.Add(type, result = new List<TypeMap>());
             }
             return result;
-        }
-
-        private object GetOne(TypeMap map)
-        {
-            if (map.HasValue)
-            {
-                return map.Value;
-            }
-
-            map.Value = Instantiate(map.To);
-            map.HasValue = true;
-
-            return map.Value;
         }
 
         private object Instantiate(Type type)
@@ -153,7 +150,13 @@
 
             try
             {
-                return InstantiateCore(type);
+                var instance = InstantiateCore(type);
+                if (instance != null)
+                {
+                    Map(instance.GetType(), instance);
+                }
+
+                return instance;
             }
             finally
             {

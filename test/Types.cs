@@ -5,9 +5,10 @@
     using System.Linq;
 
     interface IFoo { }
+    interface IFoo2 { }
 
     class Foo : IFoo { }
-    class Foo2 : IFoo { }
+    class Foo2 : IFoo, IFoo2 { }
 
     class Bar
     {

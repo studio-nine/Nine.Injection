@@ -45,6 +45,14 @@
         }
 
         [Fact]
+        public void object_mapped_to_different_interfaces_is_also_singleton()
+        {
+            var container = new Container().Map<IFoo, Foo2>().Map<IFoo2, Foo2>();
+            Assert.Equal(container.Get<IFoo>(), container.Get<IFoo>());
+            Assert.Equal(container.Get<IFoo>(), (IFoo)container.Get<IFoo2>());
+        }
+
+        [Fact]
         public void get_unmapped_type()
         {
             Assert.IsType<Foo>(new Container().Get<Foo>());
@@ -118,7 +126,7 @@
             var instance = new Container().Map<IFoo, Foo>().Map<IFoo, Foo2>().Get<ArrayConstructor>();
             Assert.NotNull(instance);
             Assert.IsType<Foo2>(instance.Foo);
-            Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
+            Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.Equal(instance.Foo, e));
         }
 
         [Fact]
@@ -127,7 +135,7 @@
             var instance = new Container().Map<IFoo, Foo>().Map<IFoo, Foo2>().Get<EnumerableConstructor>();
             Assert.NotNull(instance);
             Assert.IsType<Foo2>(instance.Foo);
-            Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e));
+            Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.Equal(instance.Foo, e));
         }
     }
 }
