@@ -48,7 +48,7 @@
                 {
                     exportedTypes = assembly.ExportedTypes;
                 }
-                catch (ReflectionTypeLoadException)
+                catch (Exception)
                 {
                     continue;
                 }
