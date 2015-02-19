@@ -5,6 +5,9 @@
     using System.ComponentModel;
     using System.Reflection;
 
+    /// <summary>
+    /// Contains extension method for <see cref="IContainer"/> interface.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ContainerExtensions
     {
@@ -23,7 +26,7 @@
         /// Map an implementation type against an interface or class
         /// </summary>
         /// <typeparam name="TFrom">The type of interface or class to be registered</typeparam>
-        /// <typeparam name="TTo">The type of concrete class to be instantiated when <see cref="TFrom" /> is resolved from the container.</typeparam>
+        /// <typeparam name="TTo">The type of concrete class to be instantiated when <typeparamref name="TFrom"/> is resolved from the container.</typeparam>
         /// <returns>The container, complete with new registration</returns>
         public static IContainer Map<TFrom, TTo>(this IContainer container) where TTo : TFrom
         {
@@ -84,6 +87,7 @@
         /// <summary>
         /// Map a specific instance of a concrete implementation for an interface or class
         /// </summary>
+        /// <param name="container">The container</param>
         /// <typeparam name="T">The type of interface or class to be registered</typeparam>
         /// <param name="instance">The instance to register in the container</param>
         /// <returns>The container, complete with new registration</returns>

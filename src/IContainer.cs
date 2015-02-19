@@ -33,7 +33,6 @@
         /// <summary>
         /// Gets all registered instances of a specified type
         /// </summary>
-        /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
         /// <returns>A collection of registered instances. If no instances are registered, returns empty collection, not null</returns>
         IEnumerable GetAll(Type type);
     }
