@@ -6,10 +6,15 @@
     using System.Linq;
     using System.Reflection;
 
-    public class Container : IEnumerable<TypeMap>, IContainer
+    public class Container : IContainer
     {
         private readonly Dictionary<Type, List<TypeMap>> map = new Dictionary<Type, List<TypeMap>>();
         private readonly List<Type> dependencyTracker = new List<Type>();
+
+        public IEnumerable<TypeMap> Mapping
+        {
+            get { return map.SelectMany(m => m.Value).Where(m => m.To != null); }
+        }
 
         /// <inheritdoc />
         public void Map(Type from, Type to)
@@ -206,16 +211,6 @@
             }
 
             return constructor.Invoke(constructorParams);
-        }
-        
-        public IEnumerator<TypeMap> GetEnumerator()
-        {
-            return map.Values.SelectMany(m => m).Where(m => m.To != null).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }
