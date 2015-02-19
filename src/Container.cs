@@ -179,11 +179,12 @@
             var paramCount = -1;
             foreach (var candidate in type.GetTypeInfo().DeclaredConstructors)
             {
-                parameters = candidate.GetParameters();
-                if (parameters.Length > paramCount)
+                var candidateParameters = candidate.GetParameters();
+                if (candidateParameters.Length > paramCount)
                 {
-                    paramCount = parameters.Length;
                     constructor = candidate;
+                    parameters = candidateParameters;
+                    paramCount = candidateParameters.Length;
                 }
             }
 
