@@ -127,7 +127,7 @@
         }
 
         /// <summary>
-        /// Try to resolve an instance of the specified interface (or class) Type
+        /// Try to resolve an instance of the specified interface or class.
         /// </summary>
         /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
         /// <returns>An instance of <typeparamref name="T"/> if registered, or null</returns>
@@ -137,13 +137,43 @@
         }
 
         /// <summary>
+        /// Enables a fluent way to resolve an instance of the specified interface or class.
+        /// </summary>
+        /// <param name="container">The container</param>
+        /// <param name="instance">An instance of <typeparamref name="T"/> if registered, or null</param>
+        /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
+        /// <returns></returns>
+        public static IContainer Get<T>(this IContainer container, out T instance) where T : class
+        {
+            instance = container.Get(typeof(T)) as T;
+            return container;
+        }
+
+        /// <summary>
         /// Gets all registered instances of a specified type
         /// </summary>
+        /// <param name="container">The container</param>
         /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
         /// <returns>A collection of registered instances. If no instances are registered, returns empty collection, not null</returns>
         public static IEnumerable<T> GetAll<T>(this IContainer container)
         {
             return (IEnumerable<T>)container.GetAll(typeof(T));
+        }
+
+        /// <summary>
+        /// Enables a fluent way to resolve all registered instances of the specified type
+        /// </summary>
+        /// <param name="container">The container</param>
+        /// <param name="instances">A collection to hold the registered instances.</param>
+        /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
+        /// <returns></returns>
+        public static IContainer GetAll<T>(this IContainer container, ICollection<T> instances)
+        {
+            foreach (var instance in (IEnumerable<T>)container.GetAll(typeof(T)))
+            {
+                instances.Add(instance);
+            }
+            return container;
         }
 
         /// <summary>
