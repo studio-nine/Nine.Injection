@@ -6,12 +6,18 @@
     using System.Linq;
     using System.Reflection;
 
+    /// <summary>
+    /// Represents a constructor dependency injection container.
+    /// </summary>
     public class Container : IContainer
     {
         private readonly Dictionary<Type, List<TypeMap>> map = new Dictionary<Type, List<TypeMap>>();
         private readonly List<Type> dependencyTracker = new List<Type>();
 
-        public IEnumerable<TypeMap> Mapping
+        /// <summary>
+        /// Gets the type mappings managed by this container.
+        /// </summary>
+        public IEnumerable<TypeMap> Mappings
         {
             get { return map.SelectMany(m => m.Value).Where(m => m.To != null); }
         }

@@ -3,6 +3,9 @@
     using System;
     using System.Collections;
 
+    /// <summary>
+    /// Represents a constructor dependency injection container.
+    /// </summary>
     public interface IContainer
     {
         /// <summary>
