@@ -9,7 +9,6 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5B3F9589-BF9A-4D95-BC54-45FB727D7DEA}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Nine.Injection.Test</RootNamespace>
     <AssemblyName>Nine.Injection.Test</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
@@ -37,9 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="ContainerSpec.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\Nine.Injection.csproj">
