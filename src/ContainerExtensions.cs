@@ -127,6 +127,22 @@
         }
 
         /// <summary>
+        /// Map a specific instance of a concrete implementation for an interface or class
+        /// </summary>
+        /// <param name="container">The container</param>
+        /// <typeparam name="T">The type of interface or class to be registered</typeparam>
+        /// <param name="instances">The instances to register in the container</param>
+        /// <returns>The container, complete with new registration</returns>
+        public static IContainer Map<T>(this IContainer container, params T[] instances)
+        {
+            foreach (var instance in instances)
+            {
+                container.Map(typeof(T), instance);
+            }
+            return container;
+        }
+
+        /// <summary>
         /// Try to resolve an instance of the specified interface or class.
         /// </summary>
         /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
