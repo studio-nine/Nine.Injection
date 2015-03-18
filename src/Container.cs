@@ -12,7 +12,7 @@
     public class Container : IContainer
     {
         private readonly Dictionary<Type, List<TypeMap>> mappings = new Dictionary<Type, List<TypeMap>>();
-        private readonly List<Type> dependencyTracker = new List<Type>();
+        private readonly HashSet<Type> dependencyTracker = new HashSet<Type>();
 
         /// <summary>
         /// Gets the type mappings managed by this container.
