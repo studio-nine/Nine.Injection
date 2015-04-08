@@ -106,4 +106,17 @@
         public IFoo Foo;
         public PerInstanceParameter(int id, IFoo foo) { this.Id = id; this.Foo = foo; }
     }
+
+    class DependsOnPerInstanceParameter
+    {
+        public Func<int, PerInstanceParameter> Factory;
+        public Func<int, IFoo, PerInstanceParameter> Factory2;
+        public DependsOnPerInstanceParameter(
+            Func<int, PerInstanceParameter> factory,
+            Func<int, IFoo, PerInstanceParameter> factory2)
+        {
+            this.Factory = factory;
+            this.Factory2 = factory2;
+        }
+    }
 }

@@ -37,6 +37,7 @@
     <DocumentationFile>bin\Release\Nine.Injection.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FuncFactory.cs" />
     <Compile Include="ContainerExtensions.cs" />
     <Compile Include="ParameterizedType.cs" />
     <Compile Include="TypeMap.cs" />

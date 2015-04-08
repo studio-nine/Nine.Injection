@@ -11,8 +11,15 @@
     /// </summary>
     public class Container : IContainer
     {
+        private readonly FuncFactory funcFactory;
         private readonly Dictionary<ParameterizedType, List<TypeMap>> mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
         private readonly HashSet<Type> dependencyTracker = new HashSet<Type>();
+
+        /// <inheritdoc />
+        public Container()
+        {
+            funcFactory = new FuncFactory(this);
+        }
 
         /// <summary>
         /// Gets the type mappings managed by this container.
@@ -106,21 +113,6 @@
             return instance;
         }
 
-        private Func<T> GetCoreGeneric<T>()
-        {
-            return new Func<T>(() => (T)GetCore(typeof(T), null));
-        }
-
-        private static MethodInfo getCoreMethod;
-        private static MethodInfo GetCoreMethod(Type type)
-        {
-            if (getCoreMethod == null)
-            {
-                getCoreMethod = typeof(Container).GetRuntimeMethods().First(m => m.Name == "GetCoreGeneric");
-            }
-            return getCoreMethod.MakeGenericMethod(type);
-        }
-
         /// <inheritdoc />
         public IEnumerable GetAll(Type type)
         {
@@ -196,13 +188,13 @@
 
                 if (definition == typeof(Lazy<>))
                 {
-                    var func = GetCoreMethod(type.GenericTypeArguments[0]).Invoke(this, null);
+                    var func = funcFactory.MakeFunc(typeof(Func<>).MakeGenericType(type.GenericTypeArguments[0]));
                     return Activator.CreateInstance(type, func);
                 }
 
-                if (definition == typeof(Func<>))
+                if (funcFactory.IsFuncDefinition(definition))
                 {
-                    return GetCoreMethod(type.GenericTypeArguments[0]).Invoke(this, null);
+                    return funcFactory.MakeFunc(type);
                 }
             }
 

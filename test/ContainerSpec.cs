@@ -202,5 +202,14 @@
             Assert.Equal(container.Get<PerInstanceParameter>(1, a), container.Get<PerInstanceParameter>(1, a));
             Assert.NotEqual(container.Get<PerInstanceParameter>(1, a), container.Get<PerInstanceParameter>(1));
         }
+
+        [Fact]
+        public void use_func_as_the_factory_to_create_instance_with_custom_parameters()
+        {
+            var a = new Foo();
+            var factory = new Container().Map<IFoo, Foo>().Get<DependsOnPerInstanceParameter>();
+            Assert.Equal(10, factory.Factory(10).Id);
+            Assert.Equal(a, factory.Factory2(10, a).Foo);
+        }
     }
 }
