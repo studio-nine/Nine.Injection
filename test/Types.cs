@@ -80,16 +80,23 @@
         public Pong(IPing ping) { }
     }
 
-    class Pong2 : IPong
+    class PongLazy : IPong
     {
         Lazy<IPing> ping;
         public IPing Ping { get { return ping.Value; } }
-        public Pong2(Lazy<IPing> ping) { this.ping = ping; }
+        public PongLazy(Lazy<IPing> ping) { this.ping = ping; }
     }
 
-    class Pong3 : IPong
+    class PongFunc : IPong
+    {
+        Func<IPing> ping;
+        public IPing Ping { get { return ping(); } }
+        public PongFunc(Func<IPing> ping) { this.ping = ping; }
+    }
+
+    class PongLazyInConstructor : IPong
     {
         public IPing Ping { get; private set; }
-        public Pong3(Lazy<IPing> ping) { this.Ping = ping.Value; }
+        public PongLazyInConstructor(Lazy<IPing> ping) { this.Ping = ping.Value; }
     }
 }

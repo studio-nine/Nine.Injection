@@ -87,14 +87,30 @@
         [Fact]
         public void lazy_can_resolve_circular_dependency()
         {
-            var ping = new Container().Map<IPing, Ping>().Map<IPong, Pong2>().Get<IPing>();
+            var ping = new Container().Map<IPing, Ping>().Map<IPong, PongLazy>().Get<IPing>();
             Assert.Equal(ping, ping.Pong.Ping);
+        }
+
+        [Fact]
+        public void func_can_resolve_circular_dependency()
+        {
+            var ping = new Container().Map<IPing, Ping>().Map<IPong, PongFunc>().Get<IPing>();
+            Assert.Equal(ping, ping.Pong.Ping);
+        }
+
+        [Fact]
+        public void can_override_the_default_func_implementation_provided_by_the_container()
+        {
+            var ping1 = new Ping(null);
+            var ping = new Container().Map<IPing, Ping>().Map<IPong, PongFunc>().Map(new Func<IPing>(() => ping1)).Get<IPing>();
+            Assert.Equal(ping1, ping.Pong.Ping);
+            Assert.NotEqual(ping1, ping);
         }
 
         [Fact]
         public void resolve_lazy_within_constructor_should_throw_on_circular_dependency()
         {
-            Assert.Throws<TargetInvocationException>(() => new Container().Map<IPing, Ping>().Map<IPong, Pong3>().Get<IPing>());
+            Assert.Throws<TargetInvocationException>(() => new Container().Map<IPing, Ping>().Map<IPong, PongLazyInConstructor>().Get<IPing>());
         }
 
         [Fact]
