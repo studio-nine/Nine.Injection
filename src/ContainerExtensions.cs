@@ -191,13 +191,5 @@
             }
             return container;
         }
-
-        /// <summary>
-        /// Make the container synchronized.
-        /// </summary>
-        public static IContainer Synchronized(this IContainer container)
-        {
-            return new SynchronizedContainer(container);
-        }
     }
 }

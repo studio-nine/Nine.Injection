@@ -37,7 +37,6 @@
     <DocumentationFile>bin\Release\Nine.Injection.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="SynchronizedContainer.cs" />
     <Compile Include="ContainerExtensions.cs" />
     <Compile Include="TypeMap.cs" />
     <Compile Include="IContainer.cs" />
