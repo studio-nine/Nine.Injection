@@ -31,6 +31,14 @@
         object Get(Type type);
 
         /// <summary>
+        /// Try to resolve an instance of the specified interface (or class) Type with the supplied parameter overrides.
+        /// </summary>
+        /// <param name="type">The type of interface or class to be resolved</param>
+        /// <param name="parameterOverrides">A collection of parameters to override when calling the constructor.</param>
+        /// <returns>An instance of <paramref name="type"/> if registered, or null</returns>
+        object Get(Type type, params object[] parameterOverrides);
+
+        /// <summary>
         /// Gets all registered instances of a specified type
         /// </summary>
         /// <returns>A collection of registered instances. If no instances are registered, returns empty collection, not null</returns>

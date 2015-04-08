@@ -153,6 +153,17 @@
         }
 
         /// <summary>
+        /// Try to resolve an instance of the specified interface or class using parameter override.
+        /// </summary>
+        /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
+        /// <param name="parameterOverrides">A collection of parameters to override when calling the constructor.</param>
+        /// <returns>An instance of <typeparamref name="T"/> if registered, or null</returns>
+        public static T Get<T>(this IContainer container, params object[] parameterOverrides) where T : class
+        {
+            return container.Get(typeof(T), parameterOverrides) as T;
+        }
+
+        /// <summary>
         /// Enables a fluent way to resolve an instance of the specified interface or class.
         /// </summary>
         /// <param name="container">The container</param>

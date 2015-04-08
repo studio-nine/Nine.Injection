@@ -11,7 +11,7 @@
     /// </summary>
     public class Container : IContainer
     {
-        private readonly Dictionary<Type, List<TypeMap>> mappings = new Dictionary<Type, List<TypeMap>>();
+        private readonly Dictionary<ParameterizedType, List<TypeMap>> mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
         private readonly HashSet<Type> dependencyTracker = new HashSet<Type>();
 
         /// <summary>
@@ -35,7 +35,7 @@
                 throw new ArgumentNullException(nameof(to));
             }
 
-            GetMappings(from).Add(new TypeMap { From = from, To = to });
+            GetMappings(new ParameterizedType { Type = from }).Add(new TypeMap { From = from, To = to });
         }
 
         /// <inheritdoc />
@@ -52,19 +52,27 @@
                 mapping.To = instance.GetType();
             }
 
-            GetMappings(type).Add(mapping);
+            GetMappings(new ParameterizedType { Type = type }).Add(mapping);
         }
 
         /// <inheritdoc />
         public object Get(Type type)
         {
             dependencyTracker.Clear();
-            return GetCore(type);
+            return GetCore(type, null);
         }
 
-        private object GetCore(Type type)
+        /// <inheritdoc />
+        public object Get(Type type, params object[] parameterOverrides)
         {
-            var mappings = GetMappings(type);
+            dependencyTracker.Clear();
+            return GetCore(type, parameterOverrides);
+        }
+
+        private object GetCore(Type type, object[] parameterOverrides)
+        {
+            var parameterizedType = new ParameterizedType { Type = type, Parameters = parameterOverrides };
+            var mappings = GetMappings(parameterizedType);
             var hasMapping = mappings.Count > 0;
             var map = hasMapping ? mappings[mappings.Count - 1] : new TypeMap { From = type };
 
@@ -78,11 +86,11 @@
 
                 if (map.To != type)
                 {
-                    return GetCore(map.To);
+                    return GetCore(map.To, null);
                 }
             }
 
-            var instance = Instantiate(type);
+            var instance = Instantiate(type, parameterOverrides);
             if (instance != null)
             {
                 map.To = instance.GetType();
@@ -94,12 +102,13 @@
             {
                 mappings.Add(map);
             }
+
             return instance;
         }
 
         private Func<T> GetCoreGeneric<T>()
         {
-            return new Func<T>(() => (T)GetCore(typeof(T)));
+            return new Func<T>(() => (T)GetCore(typeof(T), null));
         }
 
         private static MethodInfo getCoreMethod;
@@ -122,20 +131,20 @@
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
-            this.mappings.TryGetValue(type, out mappings);
+            this.mappings.TryGetValue(new ParameterizedType { Type = type }, out mappings);
 
             IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
             if (result.Count > 0)
             {
                 for (var i = 0; i < mappings.Count; i++)
                 {
-                    result[i] = GetCore(mappings[i].To);
+                    result[i] = GetCore(mappings[i].To, null);
                 }
             }
             return result;
         }
-
-        private List<TypeMap> GetMappings(Type type)
+        
+        private List<TypeMap> GetMappings(ParameterizedType type)
         {
             List<TypeMap> result;
             if (!mappings.TryGetValue(type, out result))
@@ -145,7 +154,7 @@
             return result;
         }
 
-        private object Instantiate(Type type)
+        private object Instantiate(Type type, object[] parameterOverrides)
         {
             if (dependencyTracker.Contains(type))
             {
@@ -156,7 +165,7 @@
 
             try
             {
-                var instance = InstantiateCore(type);
+                var instance = InstantiateCore(type, parameterOverrides);
                 if (instance != null)
                 {
                     Map(instance.GetType(), instance);
@@ -170,7 +179,7 @@
             }
         }
 
-        private object InstantiateCore(Type type)
+        private object InstantiateCore(Type type, object[] parameterOverrides)
         {
             if (type.IsArray)
             {
@@ -227,7 +236,14 @@
             var constructorParams = new object[parameters.Length];
             for (var i = 0; i < parameters.Length; i++)
             {
-                constructorParams[i] = GetCore(parameters[i].ParameterType);
+                if (parameterOverrides != null && i < parameterOverrides.Length)
+                {
+                    constructorParams[i] = parameterOverrides[i];
+                }
+                else
+                {
+                    constructorParams[i] = GetCore(parameters[i].ParameterType, null);
+                }
             }
 
             return constructor.Invoke(constructorParams);

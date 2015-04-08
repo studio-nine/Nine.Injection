@@ -1,6 +1,7 @@
 ﻿namespace Nine.Injection.Test
 {
     using System;
+    using System.Linq;
     using System.Reflection;
     using Xunit;
 
@@ -165,6 +166,41 @@
             GC.WaitForPendingFinalizers();
             instance = container.Get<IFoo>();
             Assert.Equal(2, WeakFoo.InstanceCount);
+        }
+
+        [Fact]
+        public void get_object_with_parameter_override()
+        {
+            var container = new Container().Map<IFoo, Foo>();
+            var instances = new[]
+            {
+                container.Get<PerInstanceParameter>(),
+                container.Get<PerInstanceParameter>(1),
+                container.Get<PerInstanceParameter>(2),
+            };
+
+            Assert.All(instances, i => Assert.IsType<Foo>(i.Foo));
+            Assert.Equal(new[] { 0, 1, 2 }, instances.Select(i => i.Id));
+        }
+
+        [Fact]
+        public void get_object_with_multiple_parameter_overrides()
+        {
+            var a = new Foo();
+            var container = new Container().Map<IFoo, Foo>();
+
+            Assert.Equal(a, container.Get<PerInstanceParameter>(1, a).Foo);
+            Assert.Null(container.Get<PerInstanceParameter>(1, null).Foo);
+        }
+
+        [Fact]
+        public void returns_the_same_instance_when_parameters_equals()
+        {
+            var a = new Foo();
+            var container = new Container().Map<IFoo, Foo>();
+            Assert.Equal(container.Get<PerInstanceParameter>(1), container.Get<PerInstanceParameter>(1));
+            Assert.Equal(container.Get<PerInstanceParameter>(1, a), container.Get<PerInstanceParameter>(1, a));
+            Assert.NotEqual(container.Get<PerInstanceParameter>(1, a), container.Get<PerInstanceParameter>(1));
         }
     }
 }

@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ContainerExtensions.cs" />
+    <Compile Include="ParameterizedType.cs" />
     <Compile Include="TypeMap.cs" />
     <Compile Include="IContainer.cs" />
     <Compile Include="Container.cs" />

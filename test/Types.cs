@@ -99,4 +99,11 @@
         public IPing Ping { get; private set; }
         public PongLazyInConstructor(Lazy<IPing> ping) { this.Ping = ping.Value; }
     }
+
+    class PerInstanceParameter
+    {
+        public int Id;
+        public IFoo Foo;
+        public PerInstanceParameter(int id, IFoo foo) { this.Id = id; this.Foo = foo; }
+    }
 }
