@@ -10,6 +10,12 @@
     class Foo : IFoo { }
     class Foo2 : IFoo, IFoo2 { }
 
+    class WeakFoo : IFoo
+    {
+        public static int InstanceCount;
+        public WeakFoo() { InstanceCount++; }
+    }
+
     class Bar
     {
         public IFoo Foo { get; private set; }

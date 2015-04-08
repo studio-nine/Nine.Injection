@@ -137,5 +137,18 @@
             Assert.IsType<Foo2>(instance.Foo);
             Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.Equal(instance.Foo, e));
         }
+
+        [Fact]
+        public void container_tracks_objects_using_weak_references()
+        {
+            var container = new Container().Map<IFoo, WeakFoo>();
+            var instance = container.Get<IFoo>();
+            Assert.Equal(1, WeakFoo.InstanceCount);
+            instance = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            instance = container.Get<IFoo>();
+            Assert.Equal(2, WeakFoo.InstanceCount);
+        }
     }
 }

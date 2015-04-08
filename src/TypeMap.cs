@@ -9,8 +9,7 @@
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class TypeMap
     {
-        internal bool HasValue;
-        internal object Value;
+        internal WeakReference<object> Value;
 
         /// <summary>
         /// Gets the type of interface or class to be registered

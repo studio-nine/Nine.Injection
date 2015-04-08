@@ -46,7 +46,7 @@
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var mapping = new TypeMap { From = type, HasValue = true, Value = instance };
+            var mapping = new TypeMap { From = type, Value = new WeakReference<object>(instance) };
             if (instance != null)
             {
                 mapping.To = instance.GetType();
@@ -65,30 +65,36 @@
         private object GetCore(Type type)
         {
             var mappings = GetMappings(type);
-            if (mappings.Count > 0)
+            var hasMapping = mappings.Count > 0;
+            var map = hasMapping ? mappings[mappings.Count - 1] : new TypeMap { From = type };
+
+            if (hasMapping)
             {
-                return GetOne(mappings[mappings.Count - 1]);
+                object result;
+                if (map.Value != null && map.Value.TryGetTarget(out result))
+                {
+                    return result;
+                }
+
+                if (map.To != type)
+                {
+                    return GetCore(map.To);
+                }
             }
 
             var instance = Instantiate(type);
-            var mapping = new TypeMap { From = type, Value = instance, HasValue = true };
             if (instance != null)
             {
-                mapping.To = instance.GetType();
+                map.To = instance.GetType();
             }
 
-            mappings.Add(mapping);
-            return instance;
-        }
+            map.Value = new WeakReference<object>(instance);
 
-        private object GetOne(TypeMap map)
-        {
-            if (map.HasValue)
+            if (!hasMapping)
             {
-                return map.Value;
+                mappings.Add(map);
             }
-
-            return GetCore(map.To);
+            return instance;
         }
 
         private Func<T> GetCoreGeneric<T>()
@@ -123,7 +129,7 @@
             {
                 for (var i = 0; i < mappings.Count; i++)
                 {
-                    result[i] = GetOne(mappings[i]);
+                    result[i] = GetCore(mappings[i].To);
                 }
             }
             return result;
