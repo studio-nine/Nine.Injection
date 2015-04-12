@@ -47,9 +47,7 @@
 
         public override int GetHashCode()
         {
-            ulong hash = 2166136261U;
-
-            hash ^= (ulong)Type.GetHashCode();
+            var hash = Type.GetHashCode();
 
             if (Parameters != null)
             {
@@ -58,12 +56,12 @@
                 {
                     var item = Parameters[i];
                     if (item == null) continue;
-                    hash ^= (ulong)item.GetHashCode();
-                    hash *= 16777619U;
+                    hash = (hash << 5) + hash;
+                    hash ^= item.GetHashCode();
                 }
             }
 
-            return (int)hash;
+            return hash;
         }
     }
 }
