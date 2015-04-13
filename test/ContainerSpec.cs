@@ -22,7 +22,8 @@
         [Fact]
         public void add_then_get_an_instance()
         {
-            Assert.IsType<Foo>(new Container().Map<IFoo>(new Foo()).Get<IFoo>());
+            var foo = new Foo();
+            Assert.Equal(foo, new Container().Map<IFoo>(foo).Get<IFoo>());
         }
 
         [Fact]
@@ -68,7 +69,8 @@
         [Fact]
         public void get_using_constructor_injection_with_registered_instance()
         {
-            Assert.IsType<Foo2>(new Container().Map<IFoo>(new Foo2()).Get<Bar>().Foo);
+            var foo = new Foo2();
+            Assert.Equal(foo, new Container().Map<IFoo>(foo).Get<Bar>().Foo);
         }
 
         [Fact]
@@ -123,8 +125,11 @@
         [Fact]
         public void get_all_returns_all_mapping_in_registration_order()
         {
-            var instance = new Container().Map<IFoo, Foo>().Map<IFoo>(new Foo2()).Map<IFoo>(new Foo()).GetAll<IFoo>();
-            Assert.Collection(instance, e => Assert.IsType<Foo>(e), e => Assert.IsType<Foo2>(e), e => Assert.IsType<Foo>(e));
+            var foos = new IFoo[] { new Foo2(), new Foo() };
+            var instance = new Container().Map<IFoo, Foo>().Map(foos[0]).Map(foos[1]).GetAll<IFoo>();
+            Assert.IsType<Foo>(instance.First());
+            Assert.NotEqual(instance.First(), foos[1]);
+            Assert.Equal(foos, instance.Skip(1));
         }
 
         [Fact]
@@ -156,7 +161,7 @@
         }
 
         [Fact]
-        public void container_tracks_objects_using_weak_references()
+        public void container_tracks_created_objects_using_weak_references()
         {
             var container = new Container().Map<IFoo, WeakFoo>();
             var instance = container.Get<IFoo>();
@@ -166,6 +171,19 @@
             GC.WaitForPendingFinalizers();
             instance = container.Get<IFoo>();
             Assert.Equal(2, WeakFoo.InstanceCount);
+        }
+
+        [Fact]
+        public void container_tracks_explicitly_mapped_objects_using_strong_references()
+        {
+            var container = new Container().Map<IFoo>(new WeakFoo2());
+            var instance = container.Get<IFoo>();
+            Assert.Equal(1, WeakFoo2.InstanceCount);
+            instance = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            instance = container.Get<IFoo>();
+            Assert.Equal(1, WeakFoo2.InstanceCount);
         }
 
         [Fact]

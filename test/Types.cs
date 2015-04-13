@@ -16,6 +16,12 @@
         public WeakFoo() { InstanceCount++; }
     }
 
+    class WeakFoo2 : IFoo
+    {
+        public static int InstanceCount;
+        public WeakFoo2() { InstanceCount++; }
+    }
+
     class Bar
     {
         public IFoo Foo { get; private set; }

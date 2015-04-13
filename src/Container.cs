@@ -48,12 +48,18 @@
         /// <inheritdoc />
         public void Map(Type type, object instance)
         {
+            Map(type, instance, false);
+        }
+
+        private void Map(Type type, object instance, bool weak)
+        {
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var mapping = new TypeMap { From = type, Value = new WeakReference<object>(instance) };
+            var mapping = new TypeMap { From = type };
+            mapping.SetValue(instance, weak);
             if (instance != null)
             {
                 mapping.To = instance.GetType();
@@ -86,7 +92,7 @@
             if (hasMapping)
             {
                 object result;
-                if (map.Value != null && map.Value.TryGetTarget(out result))
+                if (map.TryGetValue(out result))
                 {
                     return result;
                 }
@@ -103,7 +109,7 @@
                 map.To = instance.GetType();
             }
 
-            map.Value = new WeakReference<object>(instance);
+            map.SetValue(instance, true);
 
             if (!hasMapping)
             {
@@ -128,9 +134,18 @@
             IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
             if (result.Count > 0)
             {
+                object instance;
                 for (var i = 0; i < mappings.Count; i++)
                 {
-                    result[i] = GetCore(mappings[i].To, null);
+                    var mapping = mappings[i];
+                    if (mapping.TryGetValue(out instance))
+                    {
+                        result[i] = instance;
+                    }
+                    else
+                    {
+                        result[i] = GetCore(mappings[i].To, null);
+                    }
                 }
             }
             return result;
@@ -160,7 +175,7 @@
                 var instance = InstantiateCore(type, parameterOverrides);
                 if (instance != null)
                 {
-                    Map(instance.GetType(), instance);
+                    Map(instance.GetType(), instance, true);
                 }
 
                 return instance;

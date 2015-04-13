@@ -9,7 +9,40 @@
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class TypeMap
     {
-        internal WeakReference<object> Value;
+        private bool hasValue;
+        private WeakReference<object> weakValue;
+        private object value;
+
+        internal void SetValue(object value, bool weak)
+        {
+            this.hasValue = true;
+
+            if (weak)
+            {
+                this.weakValue = new WeakReference<object>(value);
+            }
+            else
+            {
+                this.value = value;
+            }
+        }
+
+        internal bool TryGetValue(out object target)
+        {
+            if (!hasValue)
+            {
+                target = null;
+                return false;
+            }
+
+            if (weakValue != null)
+            {
+                return weakValue.TryGetTarget(out target);
+            }
+
+            target = value;
+            return true;
+        }
 
         /// <summary>
         /// Gets the type of interface or class to be registered
