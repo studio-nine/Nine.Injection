@@ -61,6 +61,19 @@
         }
 
         [Fact]
+        public void primitive_types_are_mapped_to_the_default_value()
+        {
+            var container = new Container();
+
+            Assert.Equal(0, container.Get<int>());
+            Assert.Equal(0ul, container.Get<ulong>());
+            Assert.Equal(0.0, container.Get<double>());
+            Assert.Equal(null, container.Get<string>());
+            Assert.Equal(default(DateTime), container.Get<DateTime>());
+            Assert.Equal(default(TimeSpan), container.Get<TimeSpan>());
+        }
+
+        [Fact]
         public void get_using_constructor_injection()
         {
             Assert.IsType<Foo>(new Container().Map<IFoo, Foo>().Get<Bar>().Foo);

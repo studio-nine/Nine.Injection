@@ -84,6 +84,17 @@
 
         private object GetCore(Type type, object[] parameterOverrides)
         {
+            var ti = type.GetTypeInfo();
+            if (ti.IsPrimitive || ti.IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+
+            if (type == typeof(string))
+            {
+                return null;
+            }
+
             var parameterizedType = new ParameterizedType { Type = type, Parameters = parameterOverrides };
             var mappings = GetMappings(parameterizedType);
             var hasMapping = mappings.Count > 0;

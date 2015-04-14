@@ -147,9 +147,9 @@
         /// </summary>
         /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
         /// <returns>An instance of <typeparamref name="T"/> if registered, or null</returns>
-        public static T Get<T>(this IContainer container) where T : class
+        public static T Get<T>(this IContainer container)
         {
-            return container.Get(typeof(T)) as T;
+            return (T)container.Get(typeof(T));
         }
 
         /// <summary>
@@ -158,9 +158,9 @@
         /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
         /// <param name="parameterOverrides">A collection of parameters to override when calling the constructor.</param>
         /// <returns>An instance of <typeparamref name="T"/> if registered, or null</returns>
-        public static T Get<T>(this IContainer container, params object[] parameterOverrides) where T : class
+        public static T Get<T>(this IContainer container, params object[] parameterOverrides)
         {
-            return container.Get(typeof(T), parameterOverrides) as T;
+            return (T)container.Get(typeof(T), parameterOverrides);
         }
 
         /// <summary>
@@ -170,9 +170,9 @@
         /// <param name="instance">An instance of <typeparamref name="T"/> if registered, or null</param>
         /// <typeparam name="T">The type of interface or class to be resolved</typeparam>
         /// <returns></returns>
-        public static IContainer Get<T>(this IContainer container, out T instance) where T : class
+        public static IContainer Get<T>(this IContainer container, out T instance)
         {
-            instance = container.Get(typeof(T)) as T;
+            instance = (T)container.Get(typeof(T));
             return container;
         }
 
