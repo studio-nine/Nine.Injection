@@ -55,6 +55,13 @@
         }
 
         [Fact]
+        public void throw_when_the_container_is_freezed()
+        {
+            var container = new Container().Freeze();
+            Assert.Throws<InvalidOperationException>(() => container.Map<IFoo, Foo>());
+        }
+
+        [Fact]
         public void get_unmapped_type()
         {
             Assert.IsType<Foo>(new Container().Get<Foo>());

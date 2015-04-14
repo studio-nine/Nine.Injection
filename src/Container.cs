@@ -11,6 +11,7 @@
     /// </summary>
     public class Container : IContainer
     {
+        private bool freezed;
         private readonly FuncFactory funcFactory;
         private readonly Dictionary<ParameterizedType, List<TypeMap>> mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
         private readonly HashSet<Type> dependencyTracker = new HashSet<Type>();
@@ -29,9 +30,24 @@
             get { return mappings.SelectMany(m => m.Value).Where(m => m.To != null); }
         }
 
+        /// <summary>
+        /// Freezes this container and returns the freezed (this) instance.
+        /// </summary>
+        /// <returns></returns>
+        public IContainer Freeze()
+        {
+            freezed = true;
+            return this;
+        }
+
         /// <inheritdoc />
         public void Map(Type from, Type to)
         {
+            if (freezed)
+            {
+                throw new InvalidOperationException("Cannot map a type when the container is freezed");
+            }
+
             if (from == null)
             {
                 throw new ArgumentNullException(nameof(from));
@@ -48,6 +64,11 @@
         /// <inheritdoc />
         public void Map(Type type, object instance)
         {
+            if (freezed)
+            {
+                throw new InvalidOperationException("Cannot map a type when the container is freezed");
+            }
+
             Map(type, instance, false);
         }
 
