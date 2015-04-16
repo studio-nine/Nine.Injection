@@ -261,6 +261,12 @@
                 }
             }
 
+            var ti = type.GetTypeInfo();
+            if (ti.IsAbstract || ti.IsInterface)
+            {
+                return null;
+            }
+
             ConstructorInfo constructor = null;
             ParameterInfo[] parameters = null;
 
