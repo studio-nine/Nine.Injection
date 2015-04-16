@@ -12,6 +12,7 @@
     public class Container : IContainer
     {
         private bool freezed;
+        private readonly object syncRoot = new object();
         private readonly FuncFactory funcFactory;
         private readonly Dictionary<ParameterizedType, List<TypeMap>> mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
         private readonly HashSet<Type> dependencyTracker = new HashSet<Type>();
@@ -58,7 +59,10 @@
                 throw new ArgumentNullException(nameof(to));
             }
 
-            GetMappings(new ParameterizedType { Type = from }).Add(new TypeMap { From = from, To = to });
+            lock (syncRoot)
+            {
+                GetMappings(new ParameterizedType { Type = from }).Add(new TypeMap { From = from, To = to });
+            }
         }
 
         /// <inheritdoc />
@@ -69,7 +73,10 @@
                 throw new InvalidOperationException("Cannot map a type when the container is freezed");
             }
 
-            Map(type, instance, false);
+            lock (syncRoot)
+            {
+                Map(type, instance, false);
+            }
         }
 
         private void Map(Type type, object instance, bool weak)
@@ -92,15 +99,21 @@
         /// <inheritdoc />
         public object Get(Type type)
         {
-            dependencyTracker.Clear();
-            return GetCore(type, null);
+            lock (syncRoot)
+            {
+                dependencyTracker.Clear();
+                return GetCore(type, null);
+            }
         }
 
         /// <inheritdoc />
         public object Get(Type type, params object[] parameterOverrides)
         {
-            dependencyTracker.Clear();
-            return GetCore(type, parameterOverrides);
+            lock (syncRoot)
+            {
+                dependencyTracker.Clear();
+                return GetCore(type, parameterOverrides);
+            }
         }
 
         private object GetCore(Type type, object[] parameterOverrides)
@@ -154,8 +167,11 @@
         /// <inheritdoc />
         public IEnumerable GetAll(Type type)
         {
-            dependencyTracker.Clear();
-            return GetAllCore(type);
+            lock (syncRoot)
+            {
+                dependencyTracker.Clear();
+                return GetAllCore(type);
+            }
         }
 
         private IEnumerable GetAllCore(Type type)
