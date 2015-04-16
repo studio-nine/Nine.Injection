@@ -222,6 +222,20 @@
         }
 
         [Fact]
+        public void get_object_with_parameter_override_should_use_the_best_matching_constructor()
+        {
+            var container = new Container().Map<IFoo, Foo>();
+            var instances = new[]
+            {
+                container.Get<PerInstanceParameter2>(1),
+                container.Get<PerInstanceParameter2>("2"),
+            };
+
+            Assert.All(instances, i => Assert.IsType<Foo>(i.Foo));
+            Assert.Equal(new object[] { 1, "2", }, instances.Select(i => i.Id));
+        }
+
+        [Fact]
         public void get_object_with_multiple_parameter_overrides()
         {
             var a = new Foo();

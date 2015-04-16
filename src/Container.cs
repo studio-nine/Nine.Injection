@@ -182,7 +182,7 @@
             }
             return result;
         }
-        
+
         private List<TypeMap> GetMappings(ParameterizedType type)
         {
             List<TypeMap> result;
@@ -255,6 +255,11 @@
                 var candidateParameters = candidate.GetParameters();
                 if (candidateParameters.Length > paramCount)
                 {
+                    if (!ParameterMatches(candidateParameters, parameterOverrides))
+                    {
+                        continue;
+                    }
+
                     constructor = candidate;
                     parameters = candidateParameters;
                     paramCount = candidateParameters.Length;
@@ -286,6 +291,37 @@
             }
 
             return constructor.Invoke(constructorParams);
+        }
+
+        private bool ParameterMatches(ParameterInfo[] candidateParameters, object[] parameterOverrides)
+        {
+            if (parameterOverrides == null)
+            {
+                return true;
+            }
+
+            // Find best matching constructor using the input parameters
+            var minLength = Math.Min(candidateParameters.Length, parameterOverrides.Length);
+
+            for (int i = 0; i < minLength; i++)
+            {
+                var parameterType = candidateParameters[i].ParameterType.GetTypeInfo();
+                var valueType = parameterOverrides[i]?.GetType();
+
+                // Cannot assign null to a value type
+                if (parameterType.IsValueType && valueType == null)
+                {
+                    return false;
+                }
+
+                // Cannot assign when type is not assignable
+                if (valueType != null && !parameterType.IsAssignableFrom(valueType.GetTypeInfo()))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
