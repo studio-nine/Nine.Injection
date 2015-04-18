@@ -16,6 +16,7 @@
         private readonly FuncFactory funcFactory;
         private readonly Dictionary<ParameterizedType, List<TypeMap>> mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
         private readonly HashSet<Type> dependencyTracker = new HashSet<Type>();
+        private readonly Stack<Type> instantiationStack = new Stack<Type>();
 
         /// <inheritdoc />
         public Container()
@@ -142,7 +143,7 @@
                     return result;
                 }
 
-                if (map.To != type)
+                if (map.To != type && map.To != null)
                 {
                     return GetCore(map.To, null);
                 }
@@ -217,6 +218,7 @@
             }
 
             dependencyTracker.Add(type);
+            instantiationStack.Push(type);
 
             try
             {
@@ -228,9 +230,16 @@
 
                 return instance;
             }
+            catch (Exception e)
+            {
+                var path = string.Join(" -> ", instantiationStack.Select(t => t.FullName).Reverse());
+                var exceptionText = $"Error instantiating { type.FullName }, please consider the following constructor path: { path }";
+                throw new TargetInvocationException(exceptionText, e);
+            }
             finally
             {
                 dependencyTracker.Remove(type);
+                instantiationStack.Pop();
             }
         }
 

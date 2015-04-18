@@ -104,7 +104,7 @@
         [Fact]
         public void get_should_throw_on_circular_dependency()
         {
-            Assert.Throws<ArgumentException>(() => new Container().Map<IPing, Ping>().Map<IPong, Pong>().Get<IPing>());
+            Assert.Throws<TargetInvocationException>(() => new Container().Map<IPing, Ping>().Map<IPong, Pong>().Get<IPing>());
         }
 
         [Fact]
