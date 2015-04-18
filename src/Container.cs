@@ -22,6 +22,8 @@
         public Container()
         {
             funcFactory = new FuncFactory(this);
+            Map(typeof(IContainer), this);
+            Map(typeof(Container), this);
         }
 
         /// <summary>

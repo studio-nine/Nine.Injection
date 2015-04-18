@@ -68,6 +68,14 @@
         }
 
         [Fact]
+        public void container_itself_it_mapped_automatically()
+        {
+            var container = new Container();
+            Assert.Equal(container, container.Get<IContainer>());
+            Assert.Equal(container, container.Get<Container>());
+        }
+
+        [Fact]
         public void primitive_types_are_mapped_to_the_default_value()
         {
             var container = new Container();
