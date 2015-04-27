@@ -36,6 +36,19 @@
         }
 
         /// <summary>
+        /// Map an implementation type against an interface or class with parameter overrides.
+        /// </summary>
+        /// <typeparam name="TFrom">The type of interface or class to be registered</typeparam>
+        /// <typeparam name="TTo">The type of concrete class to be instantiated when <typeparamref name="TFrom"/> is resolved from the container.</typeparam>
+        /// <param name="parameterOverrides">A collection of parameters to override when calling the constructor.</param>
+        /// <returns>The container, complete with new registration</returns>
+        public static IContainer Map<TFrom, TTo>(this IContainer container, params object[] parameterOverrides) where TTo : TFrom
+        {
+            container.Map(typeof(TFrom), typeof(TTo), parameterOverrides);
+            return container;
+        }
+
+        /// <summary>
         ///  Map all exported types in the assemblies that implements T or derives from T.
         /// </summary>
         /// <returns>The container, complete with new registration</returns>
