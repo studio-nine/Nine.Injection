@@ -13,6 +13,8 @@
         private WeakReference<object> weakValue;
         private object value;
 
+        internal object[] DefaultParameterOverrides;
+
         internal void SetValue(object value, bool weak)
         {
             this.hasValue = true;

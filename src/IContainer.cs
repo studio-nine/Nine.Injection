@@ -16,6 +16,14 @@
         void Map(Type from, Type to);
 
         /// <summary>
+        /// Maps a type within the container with default parameter overrides.
+        /// </summary>
+        /// <param name="from">The type of interface or class to be registered</param>
+        /// <param name="to">The type of concrete class to be instantiated when from is resolved from the container.</param>
+        /// <param name="parameterOverrides">A collection of parameters to override when calling the constructor.</param>
+        void Map(Type from, Type to, params object[] parameterOverrides);
+
+        /// <summary>
         /// Maps a specific instance of a concrete implementation for an interface or class
         /// </summary>
         /// <param name="type">The type of interface or class to be registered</param>

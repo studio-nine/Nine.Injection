@@ -45,7 +45,10 @@
         }
 
         /// <inheritdoc />
-        public void Map(Type from, Type to)
+        public void Map(Type from, Type to) => Map(from, to, null);
+
+        /// <inheritdoc />
+        public void Map(Type from, Type to, params object[] parameterOverrides)
         {
             if (freezed)
             {
@@ -64,7 +67,18 @@
 
             lock (syncRoot)
             {
-                GetMappings(new ParameterizedType { Type = from }).Add(new TypeMap { From = from, To = to });
+                GetMappings(new ParameterizedType { Type = from }).Add(new TypeMap
+                {
+                    From = from, To = to, DefaultParameterOverrides = parameterOverrides
+                });
+
+                if (parameterOverrides != null && parameterOverrides.Length > 0)
+                {
+                    GetMappings(new ParameterizedType { Type = from, Parameters = parameterOverrides?.ToArray() }).Add(new TypeMap
+                    {
+                        From = from, To = to, DefaultParameterOverrides = parameterOverrides
+                    });
+                }
             }
         }
 
@@ -147,10 +161,10 @@
 
                 if (map.To != type && map.To != null)
                 {
-                    return GetCore(map.To, null);
+                    return GetCore(map.To, map.DefaultParameterOverrides);
                 }
             }
-
+            
             var instance = Instantiate(type, parameterOverrides);
             if (instance != null)
             {

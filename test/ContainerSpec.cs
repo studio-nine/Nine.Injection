@@ -271,5 +271,13 @@
             Assert.Equal(10, factory.Factory(10).Id);
             Assert.Equal(a, factory.Factory2(10, a).Foo);
         }
+
+        [Fact]
+        public void map_object_with_parameter_override()
+        {
+            Assert.Equal(1234, new Container()
+                .Map<IPerInstanceParameter, PerInstanceParameter>(1234)
+                .Get<IPerInstanceParameter>().Id);
+        }
     }
 }
