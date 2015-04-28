@@ -138,4 +138,15 @@
             this.Factory2 = factory2;
         }
     }
+
+    class ConstructorWithDefaultParameter
+    {
+        public int Int;
+        public string String;
+        public ConstructorWithDefaultParameter(int i, string s = "default")
+        {
+            this.Int = i;
+            this.String = s;
+        }
+    }
 }

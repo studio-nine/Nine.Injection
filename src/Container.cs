@@ -333,7 +333,8 @@
                 }
                 else
                 {
-                    constructorParams[i] = GetCore(parameters[i].ParameterType, null);
+                    constructorParams[i] = GetCore(parameters[i].ParameterType, null)
+                        ?? (parameters[i].HasDefaultValue ? parameters[i].DefaultValue : null);
                 }
             }
 

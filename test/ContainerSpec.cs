@@ -76,6 +76,12 @@
         }
 
         [Fact]
+        public void get_respect_parameter_default_value()
+        {
+            Assert.Equal("default", new Container().Get<ConstructorWithDefaultParameter>().String);
+        }
+
+        [Fact]
         public void primitive_types_are_mapped_to_the_default_value()
         {
             var container = new Container();
