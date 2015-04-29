@@ -5,6 +5,7 @@
     using System.Linq;
 
     interface IFoo { }
+    interface IFooDerived { }
     interface IFoo2 { }
 
     class Foo : IFoo { }
