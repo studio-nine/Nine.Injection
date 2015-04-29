@@ -209,7 +209,7 @@
                     }
                     else
                     {
-                        result[i] = GetCore(mappings[i].To, null);
+                        result[i] = GetCore(mappings[i].To, mappings[i].DefaultParameterOverrides);
                     }
                 }
             }
