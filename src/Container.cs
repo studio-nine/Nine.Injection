@@ -35,6 +35,11 @@
         }
 
         /// <summary>
+        /// Gets or sets the equality comparer to compare the equality of parameter objects.
+        /// </summary>
+        public IEqualityComparer<object> EqualityComparer { get; set; }
+
+        /// <summary>
         /// Freezes this container and returns the freezed (this) instance.
         /// </summary>
         /// <returns></returns>
@@ -67,7 +72,7 @@
 
             lock (syncRoot)
             {
-                GetMappings(new ParameterizedType { Type = from }).Add(new TypeMap
+                GetMappings(new ParameterizedType(from, null, EqualityComparer)).Add(new TypeMap
                 {
                     From = from,
                     To = to,
@@ -76,7 +81,7 @@
 
                 if (parameterOverrides != null && parameterOverrides.Length > 0)
                 {
-                    GetMappings(new ParameterizedType { Type = from, Parameters = parameterOverrides?.ToArray() }).Add(new TypeMap
+                    GetMappings(new ParameterizedType(from, parameterOverrides?.ToArray(), EqualityComparer)).Add(new TypeMap
                     {
                         From = from,
                         To = to,
@@ -114,7 +119,7 @@
                 mapping.To = instance.GetType();
             }
 
-            GetMappings(new ParameterizedType { Type = type }).Add(mapping);
+            GetMappings(new ParameterizedType(type, null, EqualityComparer)).Add(mapping);
         }
 
         /// <inheritdoc />
@@ -150,7 +155,7 @@
                 return null;
             }
 
-            var parameterizedType = new ParameterizedType { Type = type, Parameters = parameterOverrides };
+            var parameterizedType = new ParameterizedType(type, parameterOverrides, EqualityComparer);
             var mappings = GetMappings(parameterizedType);
             var hasMapping = mappings.Count > 0;
             var map = hasMapping ? mappings[mappings.Count - 1] : new TypeMap { From = type };
@@ -198,7 +203,7 @@
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
-            this.mappings.TryGetValue(new ParameterizedType { Type = type }, out mappings);
+            this.mappings.TryGetValue(new ParameterizedType(type, null, EqualityComparer), out mappings);
 
             IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
             if (result.Count > 0)

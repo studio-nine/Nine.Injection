@@ -125,6 +125,7 @@
         public IFoo Foo;
         public PerInstanceParameter2(int id, IFoo foo) { this.Id = id; this.Foo = foo; }
         public PerInstanceParameter2(string id, IFoo foo) { this.Id = id; this.Foo = foo; }
+        public PerInstanceParameter2(object id, IFoo foo) { this.Id = id; this.Foo = foo; }
     }
 
     class DependsOnPerInstanceParameter

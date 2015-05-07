@@ -1,6 +1,7 @@
 ﻿namespace Nine.Injection.Test
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using Xunit;
@@ -267,6 +268,38 @@
             Assert.Equal(container.Get<PerInstanceParameter>(1), container.Get<PerInstanceParameter>(1));
             Assert.Equal(container.Get<PerInstanceParameter>(1, a), container.Get<PerInstanceParameter>(1, a));
             Assert.NotEqual(container.Get<PerInstanceParameter>(1, a), container.Get<PerInstanceParameter>(1));
+        }
+
+        class CustomEqualityComparer : IEqualityComparer<object>
+        {
+            public new bool Equals(object x, object y)
+            {
+                if (x is int && y is string || y is int && x is string)
+                {
+                    return x.ToString() == y.ToString();
+                }
+                return object.Equals(x, y);
+            }
+
+            public int GetHashCode(object obj)
+            {
+                if (obj is int)
+                {
+                    return obj.ToString().GetHashCode();
+                }
+                return obj.GetHashCode();
+            }
+        }
+
+        [Fact]
+        public void returns_the_same_instance_when_parameters_equals_using_equality_comparer()
+        {
+            var a = new Foo();
+            var container = new Container() { EqualityComparer = new CustomEqualityComparer() }.Map<IFoo, Foo>();
+            Assert.Equal(container.Get<PerInstanceParameter2>(1), container.Get<PerInstanceParameter2>("1"));
+            Assert.Equal(container.Get<PerInstanceParameter2>(1, a), container.Get<PerInstanceParameter2>("1", a));
+            Assert.NotEqual(container.Get<PerInstanceParameter2>(2), container.Get<PerInstanceParameter2>("1"));
+            Assert.NotEqual(container.Get<PerInstanceParameter2>(1, a), container.Get<PerInstanceParameter2>(1));
         }
 
         [Fact]
