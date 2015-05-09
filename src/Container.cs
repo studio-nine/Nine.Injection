@@ -258,6 +258,16 @@
             if (type.IsConstructedGenericType)
             {
                 var definition = type.GetGenericTypeDefinition();
+
+                // Check for a registered generic type definition
+                var mappings = GetMappings(new ParameterizedType { Type = definition, Parameters = parameterOverrides });
+                if (mappings.Count > 0)
+                {
+                    var map = mappings[mappings.Count - 1];
+                    return InstantiateCore(map.To.MakeGenericType(type.GetTypeInfo().GenericTypeArguments), parameterOverrides);
+                }
+
+                // Handle well known generic types
                 if (definition == typeof(IEnumerable<>))
                 {
                     return GetAllCore(type.GenericTypeArguments[0]);
