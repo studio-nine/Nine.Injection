@@ -76,6 +76,12 @@
         }
 
         [Fact]
+        public void get_respect_parameter_default_value()
+        {
+            Assert.Equal("default", new Container().Get<ConstructorWithDefaultParameter>().String);
+        }
+
+        [Fact]
         public void primitive_types_are_mapped_to_the_default_value()
         {
             var container = new Container();
@@ -278,6 +284,22 @@
             Assert.Equal(1234, new Container()
                 .Map<IPerInstanceParameter, PerInstanceParameter>(1234)
                 .Get<IPerInstanceParameter>().Id);
+        }
+
+        [Fact]
+        public void it_should_resolve_generic_type_definition()
+        {
+            Assert.IsType<OpenGenerics<long, byte>>(new Container().Get<OpenGenerics<long, byte>>());
+
+            var container = new Container();
+            container.Map(typeof(IOpenGenerics<,>), typeof(OpenGenerics<,>));
+            Assert.IsType<OpenGenerics<string, short>>(container.Get<IOpenGenerics<string, short>>());
+            Assert.IsType<OpenGenerics<byte, short>>(container.Get<DependsOnOpenGenerics<byte, short>>().Data);
+            Assert.IsType<OpenGenerics<int, bool>>(container.Get<DependsOnClosedGenerics>().Data);
+
+            Assert.Equal(1, container.Get<DependsOnOpenGenerics<int, short>>(1).Id);
+            Assert.Equal(container.Get<DependsOnOpenGenerics<int, short>>(1), container.Get<DependsOnOpenGenerics<int, short>>(1));
+            Assert.NotEqual(container.Get<DependsOnOpenGenerics<int, short>>(1), container.Get<DependsOnOpenGenerics<int, short>>(2));
         }
     }
 }

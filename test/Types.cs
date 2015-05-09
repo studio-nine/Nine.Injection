@@ -138,4 +138,31 @@
             this.Factory2 = factory2;
         }
     }
+
+    class ConstructorWithDefaultParameter
+    {
+        public int Int;
+        public string String;
+        public ConstructorWithDefaultParameter(int i, string s = "default")
+        {
+            this.Int = i;
+            this.String = s;
+        }
+    }
+
+    interface IOpenGenerics<T1, T2> { }
+    class OpenGenerics<T1, T2> : IOpenGenerics<T1, T2> { }
+
+    class DependsOnOpenGenerics<T1, T2>
+    {
+        public int Id;
+        public IOpenGenerics<T1, T2> Data;
+        public DependsOnOpenGenerics(int id, IOpenGenerics<T1, T2> data) { this.Id = id; this.Data = data; }
+    }
+
+    class DependsOnClosedGenerics
+    {
+        public IOpenGenerics<int, bool> Data;
+        public DependsOnClosedGenerics(IOpenGenerics<int, bool> data) { this.Data = data; }
+    }
 }
