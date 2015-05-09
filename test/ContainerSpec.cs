@@ -1,6 +1,7 @@
 ﻿namespace Nine.Injection.Test
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using Xunit;
@@ -269,6 +270,38 @@
             Assert.NotEqual(container.Get<PerInstanceParameter>(1, a), container.Get<PerInstanceParameter>(1));
         }
 
+        class CustomEqualityComparer : IEqualityComparer<object>
+        {
+            public new bool Equals(object x, object y)
+            {
+                if (x is int && y is string || y is int && x is string)
+                {
+                    return x.ToString() == y.ToString();
+                }
+                return object.Equals(x, y);
+            }
+
+            public int GetHashCode(object obj)
+            {
+                if (obj is int)
+                {
+                    return obj.ToString().GetHashCode();
+                }
+                return obj.GetHashCode();
+            }
+        }
+
+        [Fact]
+        public void returns_the_same_instance_when_parameters_equals_using_equality_comparer()
+        {
+            var a = new Foo();
+            var container = new Container() { EqualityComparer = new CustomEqualityComparer() }.Map<IFoo, Foo>();
+            Assert.Equal(container.Get<PerInstanceParameter2>(1), container.Get<PerInstanceParameter2>("1"));
+            Assert.Equal(container.Get<PerInstanceParameter2>(1, a), container.Get<PerInstanceParameter2>("1", a));
+            Assert.NotEqual(container.Get<PerInstanceParameter2>(2), container.Get<PerInstanceParameter2>("1"));
+            Assert.NotEqual(container.Get<PerInstanceParameter2>(1, a), container.Get<PerInstanceParameter2>(1));
+        }
+
         [Fact]
         public void use_func_as_the_factory_to_create_instance_with_custom_parameters()
         {
@@ -279,11 +312,30 @@
         }
 
         [Fact]
+        public void it_should_only_inject_func_when_the_return_type_contains_a_matching_constructor()
+        {
+            Assert.NotNull(new Container().Get<Func<int, PerInstanceParameter2>>());
+            Assert.NotNull(new Container().Get<Func<int, IFoo, PerInstanceParameter2>>());
+            Assert.NotNull(new Container().Get<Func<string, IFoo, PerInstanceParameter2>>());
+
+            Assert.Null(new Container().Get<Func<long, IFoo>>());
+            Assert.Null(new Container().Get<Func<long, Foo>>());
+
+            Assert.Null(new Container().Get<Func<int, IFooDerived, PerInstanceParameter2>>());
+            Assert.Null(new Container().Get<Func<long, PerInstanceParameter2>>());
+            Assert.Null(new Container().Get<Func<long, IFoo2, PerInstanceParameter2>>());
+        }
+
+        [Fact]
         public void map_object_with_parameter_override()
         {
             Assert.Equal(1234, new Container()
                 .Map<IPerInstanceParameter, PerInstanceParameter>(1234)
                 .Get<IPerInstanceParameter>().Id);
+
+            Assert.Equal(1234, new Container()
+                .Map<IPerInstanceParameter, PerInstanceParameter>(1234)
+                .Get<IPerInstanceParameter[]>()[0].Id);
         }
 
         [Fact]

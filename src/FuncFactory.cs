@@ -24,7 +24,7 @@
         public Func<T1, T2, T3, T4, T5, T6> Get5<T1, T2, T3, T4, T5, T6>() => new Func<T1, T2, T3, T4, T5, T6>((t1, t2, t3, t4, t5) => (T6)container.Get(typeof(T6), t1, t2, t3, t4, t5));
         public Func<T1, T2, T3, T4, T5, T6, T7> Get6<T1, T2, T3, T4, T5, T6, T7>() => new Func<T1, T2, T3, T4, T5, T6, T7>((t1, t2, t3, t4, t5, t6) => (T7)container.Get(typeof(T7), t1, t2, t3, t4, t5, t6));
         public Func<T1, T2, T3, T4, T5, T6, T7, T8> Get7<T1, T2, T3, T4, T5, T6, T7, T8>() => new Func<T1, T2, T3, T4, T5, T6, T7, T8>((t1, t2, t3, t4, t5, t6, t7) => (T8)container.Get(typeof(T8), t1, t2, t3, t4, t5, t6, t7));
-
+        
         public bool IsFuncDefinition(Type type)
         {
             return type == typeof(Func<>) ||

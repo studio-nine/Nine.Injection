@@ -35,6 +35,11 @@
         }
 
         /// <summary>
+        /// Gets or sets the equality comparer to compare the equality of parameter objects.
+        /// </summary>
+        public IEqualityComparer<object> EqualityComparer { get; set; }
+
+        /// <summary>
         /// Freezes this container and returns the freezed (this) instance.
         /// </summary>
         /// <returns></returns>
@@ -67,16 +72,20 @@
 
             lock (syncRoot)
             {
-                GetMappings(new ParameterizedType { Type = from }).Add(new TypeMap
+                GetMappings(new ParameterizedType(from, null, EqualityComparer)).Add(new TypeMap
                 {
-                    From = from, To = to, DefaultParameterOverrides = parameterOverrides
+                    From = from,
+                    To = to,
+                    DefaultParameterOverrides = parameterOverrides
                 });
 
                 if (parameterOverrides != null && parameterOverrides.Length > 0)
                 {
-                    GetMappings(new ParameterizedType { Type = from, Parameters = parameterOverrides?.ToArray() }).Add(new TypeMap
+                    GetMappings(new ParameterizedType(from, parameterOverrides?.ToArray(), EqualityComparer)).Add(new TypeMap
                     {
-                        From = from, To = to, DefaultParameterOverrides = parameterOverrides
+                        From = from,
+                        To = to,
+                        DefaultParameterOverrides = parameterOverrides
                     });
                 }
             }
@@ -110,7 +119,7 @@
                 mapping.To = instance.GetType();
             }
 
-            GetMappings(new ParameterizedType { Type = type }).Add(mapping);
+            GetMappings(new ParameterizedType(type, null, EqualityComparer)).Add(mapping);
         }
 
         /// <inheritdoc />
@@ -146,7 +155,7 @@
                 return null;
             }
 
-            var parameterizedType = new ParameterizedType { Type = type, Parameters = parameterOverrides };
+            var parameterizedType = new ParameterizedType(type, parameterOverrides, EqualityComparer);
             var mappings = GetMappings(parameterizedType);
             var hasMapping = mappings.Count > 0;
             var map = hasMapping ? mappings[mappings.Count - 1] : new TypeMap { From = type };
@@ -164,7 +173,7 @@
                     return GetCore(map.To, map.DefaultParameterOverrides);
                 }
             }
-            
+
             var instance = Instantiate(type, parameterOverrides);
             if (instance != null)
             {
@@ -194,7 +203,7 @@
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
-            this.mappings.TryGetValue(new ParameterizedType { Type = type }, out mappings);
+            this.mappings.TryGetValue(new ParameterizedType(type, null, EqualityComparer), out mappings);
 
             IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
             if (result.Count > 0)
@@ -209,7 +218,7 @@
                     }
                     else
                     {
-                        result[i] = GetCore(mappings[i].To, null);
+                        result[i] = GetCore(mappings[i].To, mappings[i].DefaultParameterOverrides);
                     }
                 }
             }
@@ -289,45 +298,31 @@
                     var func = funcFactory.MakeFunc(typeof(Func<>).MakeGenericType(type.GenericTypeArguments[0]));
                     return Activator.CreateInstance(type, func);
                 }
-
+                
                 if (funcFactory.IsFuncDefinition(definition))
                 {
-                    return funcFactory.MakeFunc(type);
+                    var arguments = type.GenericTypeArguments;
+                    var funcReturnType = arguments.Last().GetTypeInfo();
+                    if (arguments.Length == 1 || MatchConstructor(funcReturnType, arguments, arguments.Length - 1, true) != null)
+                    {
+                        return funcFactory.MakeFunc(type);
+                    }
                 }
             }
 
             var ti = type.GetTypeInfo();
-            if (ti.IsAbstract || ti.IsInterface)
+            if (ti.IsAbstract || ti.IsInterface || typeof(Delegate).GetTypeInfo().IsAssignableFrom(ti))
             {
                 return null;
             }
 
-            ConstructorInfo constructor = null;
-            ParameterInfo[] parameters = null;
-
-            // Find matching constructor with the biggest number of parameters
-            var paramCount = -1;
-            foreach (var candidate in type.GetTypeInfo().DeclaredConstructors)
-            {
-                var candidateParameters = candidate.GetParameters();
-                if (candidateParameters.Length > paramCount)
-                {
-                    if (!ParameterMatches(candidateParameters, parameterOverrides))
-                    {
-                        continue;
-                    }
-
-                    constructor = candidate;
-                    parameters = candidateParameters;
-                    paramCount = candidateParameters.Length;
-                }
-            }
-
+            var constructor = MatchConstructor(ti, parameterOverrides);
             if (constructor == null)
             {
                 return null;
             }
 
+            var parameters = constructor.GetParameters();
             if (parameters.Length <= 0)
             {
                 return constructor.Invoke(null);
@@ -351,20 +346,67 @@
             return constructor.Invoke(constructorParams);
         }
 
-        private bool ParameterMatches(ParameterInfo[] candidateParameters, object[] parameterOverrides)
+        private ConstructorInfo MatchConstructor(TypeInfo type, object[] parameterOverrides)
         {
-            if (parameterOverrides == null)
+            if (parameterOverrides == null || parameterOverrides.Length <= 0)
+            {
+                return MatchConstructor(type, null, 0,  false);
+            }
+
+            var parameterTypes = new Type[parameterOverrides.Length];
+            for (var i = 0; i < parameterOverrides.Length; i++)
+            {
+                parameterTypes[i] = parameterOverrides[i]?.GetType();
+            }
+
+            return MatchConstructor(type, parameterTypes, parameterTypes.Length, false);
+        }
+        
+        private ConstructorInfo MatchConstructor(TypeInfo type, Type[] parameterTypes, int length, bool strict)
+        {
+            ConstructorInfo constructor = null;
+            ParameterInfo[] parameters = null;
+
+            // Find the best matching constructor with the biggest number of parameters
+            var paramCount = -1;
+            foreach (var candidate in type.DeclaredConstructors)
+            {
+                var candidateParameters = candidate.GetParameters();
+                if (candidateParameters.Length > paramCount)
+                {
+                    if (!MatchParameters(candidateParameters, parameterTypes, length, strict))
+                    {
+                        continue;
+                    }
+
+                    constructor = candidate;
+                    parameters = candidateParameters;
+                    paramCount = candidateParameters.Length;
+                }
+            }
+
+            return constructor;
+        }
+
+        private bool MatchParameters(ParameterInfo[] candidateParameters, Type[] parameterTypes, int length, bool strict)
+        {
+            if (strict && length > candidateParameters.Length)
+            {
+                return false;
+            }
+
+            if (parameterTypes == null || length <= 0)
             {
                 return true;
             }
 
             // Find best matching constructor using the input parameters
-            var minLength = Math.Min(candidateParameters.Length, parameterOverrides.Length);
+            var minLength = Math.Min(candidateParameters.Length, length);
 
             for (int i = 0; i < minLength; i++)
             {
                 var parameterType = candidateParameters[i].ParameterType.GetTypeInfo();
-                var valueType = parameterOverrides[i]?.GetType();
+                var valueType = parameterTypes[i];
 
                 // Cannot assign null to a value type
                 if (parameterType.IsValueType && valueType == null)
@@ -373,7 +415,17 @@
                 }
 
                 // Cannot assign when type is not assignable
-                if (valueType != null && !parameterType.IsAssignableFrom(valueType.GetTypeInfo()))
+                if (valueType == null)
+                {
+                    continue;
+                }
+
+                if (!strict && !parameterType.IsAssignableFrom(valueType.GetTypeInfo()))
+                {
+                    return false;
+                }
+
+                if (strict && parameterType != valueType.GetTypeInfo())
                 {
                     return false;
                 }

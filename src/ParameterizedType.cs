@@ -1,11 +1,20 @@
 ﻿namespace Nine.Injection
 {
     using System;
+    using System.Collections.Generic;
 
     struct ParameterizedType
     {
         public Type Type;
         public object[] Parameters;
+        public IEqualityComparer<object> EqualityComparer;
+        
+        public ParameterizedType(Type type, object[] parameters, IEqualityComparer<object> equalityComparer) : this()
+        {
+            this.Type = type;
+            this.Parameters = parameters;
+            this.EqualityComparer = equalityComparer;
+        }
 
         public override string ToString() => $"{ Type.Name }";
 
@@ -36,7 +45,14 @@
             var count = Parameters.Length;
             for (var i = 0; i < count; i++)
             {
-                if (!Equals(Parameters[i], other.Parameters[i]))
+                if (EqualityComparer != null)
+                {
+                    if (!EqualityComparer.Equals(Parameters[i], other.Parameters[i]))
+                    {
+                        return false;
+                    }
+                }
+                else if (!Equals(Parameters[i], other.Parameters[i]))
                 {
                     return false;
                 }
@@ -57,7 +73,10 @@
                     var item = Parameters[i];
                     if (item == null) continue;
                     hash = (hash << 5) + hash;
-                    hash ^= item.GetHashCode();
+
+                    hash ^= EqualityComparer != null
+                          ? EqualityComparer.GetHashCode(item) 
+                          : item.GetHashCode();
                 }
             }
 
