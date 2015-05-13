@@ -12,6 +12,8 @@ build:
   parallel: true
   publish_nuget: true
 
+clone_depth: 1
+
 version: 1.1.{build}
 
 assembly_info:
