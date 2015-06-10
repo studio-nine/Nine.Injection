@@ -1,10 +1,8 @@
 os: Visual Studio 2015 RC
 environment:
   VisualStudioVersion: 14.0
-init:
-  cmd: dnvm upgrade
 install:
-  - dnvm use 1.0.0-beta4
+  - dnvm install 1.0.0-beta4
   - dnu restore
 test_script:
   - cmd: dnx test\Nine.Injection.Test test
