@@ -1,15 +1,13 @@
-configuration: Release
-
 os: Visual Studio 2015 RC
-
+environment:
+  VisualStudioVersion: 14.0
+init:
+  cmd: dnvm upgrade
 install:
-  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-
-build:
-  parallel: true
-
-clone_depth: 1
-
+  - dnvm use 1.0.0-beta4
+  - dnu restore
+test_script:
+  - cmd: dnx test\Nine.Injection.Test test
 deploy:
 - provider: NuGet
   api_key:

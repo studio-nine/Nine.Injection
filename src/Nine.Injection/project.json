@@ -4,8 +4,8 @@
     "authors": [ "Yufei Huang" ],
     "tags": [ "PCL", "Portable", "IOC", "Constructor Injection", "Dependency Injection" ],
     "iconUrl": "https://avatars3.githubusercontent.com/u/9212229?s=64",
-    "projectUrl": "https://github.com/yufeih/Nine.Injection",
-    "licenseUrl": "https://github.com/yufeih/Nine.Injection/blob/master/LICENSE",
+    "projectUrl": "https://github.com/studio-nine/Nine.Injection",
+    "licenseUrl": "https://github.com/studio-nine/Nine.Injection/blob/master/LICENSE",
 
     "dependencies": {
     },
