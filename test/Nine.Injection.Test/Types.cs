@@ -145,7 +145,7 @@
     {
         public int Int;
         public string String;
-        public ConstructorWithDefaultParameter(int i, string s = "default")
+        public ConstructorWithDefaultParameter(int i = 1, string s = "default")
         {
             this.Int = i;
             this.String = s;

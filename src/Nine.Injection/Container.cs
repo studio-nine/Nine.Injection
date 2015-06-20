@@ -338,8 +338,17 @@
                 }
                 else
                 {
-                    constructorParams[i] = GetCore(parameters[i].ParameterType, null)
-                        ?? (parameters[i].HasDefaultValue ? parameters[i].DefaultValue : null);
+                    var parameterType = parameters[i].ParameterType;
+                    if (parameterType.GetTypeInfo().IsValueType)
+                    {
+                        constructorParams[i] = parameters[i].HasDefaultValue ? 
+                            parameters[i].DefaultValue : Activator.CreateInstance(parameterType);
+                    }
+                    else
+                    {
+                        constructorParams[i] = GetCore(parameterType, null)
+                            ?? (parameters[i].HasDefaultValue ? parameters[i].DefaultValue : null);
+                    }
                 }
             }
 

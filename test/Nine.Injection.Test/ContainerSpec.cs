@@ -79,7 +79,9 @@
         [Fact]
         public void get_respect_parameter_default_value()
         {
-            Assert.Equal("default", new Container().Get<ConstructorWithDefaultParameter>().String);
+            var container = new Container();
+            Assert.Equal("default", container.Get<ConstructorWithDefaultParameter>().String);
+            Assert.Equal(1, container.Get<ConstructorWithDefaultParameter>().Int);
         }
 
         [Fact]
