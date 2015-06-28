@@ -167,4 +167,17 @@
         public IOpenGenerics<int, bool> Data;
         public DependsOnClosedGenerics(IOpenGenerics<int, bool> data) { this.Data = data; }
     }
+
+    class ClassWithStaticConstructor
+    {
+        static ClassWithStaticConstructor() { }
+        public ClassWithStaticConstructor() { }
+    }
+
+    class ClassWithPrivateConstructors
+    {
+        public int A;
+        private ClassWithPrivateConstructors() { }
+        public ClassWithPrivateConstructors(int a = 10) { A = a; }
+    }
 }

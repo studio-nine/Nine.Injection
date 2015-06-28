@@ -380,6 +380,11 @@
             var paramCount = -1;
             foreach (var candidate in type.DeclaredConstructors)
             {
+                if (candidate.IsStatic || !candidate.IsPublic)
+                {
+                    continue;
+                }
+
                 var candidateParameters = candidate.GetParameters();
                 if (candidateParameters.Length > paramCount)
                 {

@@ -69,6 +69,18 @@
         }
 
         [Fact]
+        public void get_unmapped_type_with_static_constructor()
+        {
+            Assert.IsType<ClassWithStaticConstructor>(new Container().Get<ClassWithStaticConstructor>());
+        }
+
+        [Fact]
+        public void get_unmapped_type_with_private_constructor()
+        {
+            Assert.Equal(10, new Container().Get<ClassWithPrivateConstructors>().A);
+        }
+
+        [Fact]
         public void container_itself_it_mapped_automatically()
         {
             var container = new Container();
