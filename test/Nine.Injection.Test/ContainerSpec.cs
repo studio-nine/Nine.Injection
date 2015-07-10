@@ -69,6 +69,16 @@
         }
 
         [Fact]
+        public void map_instance_to_interface_then_get_by_instance_type()
+        {
+            var foo = new Foo2();
+            var container = new Container().Map<IFoo>(foo);
+            Assert.Equal(foo, container.Get<IFoo>());
+            Assert.Equal(foo, container.Get<Foo2>());
+            Assert.NotEqual(foo, container.Get<IFoo2>());
+        }
+
+        [Fact]
         public void container_itself_it_mapped_automatically()
         {
             var container = new Container();
@@ -160,10 +170,10 @@
         [Fact]
         public void get_all_returns_all_mapping_in_registration_order()
         {
-            var foos = new IFoo[] { new Foo2(), new Foo() };
-            var instance = new Container().Map<IFoo, Foo>().Map(foos[0]).Map(foos[1]).GetAll<IFoo>();
+            var foos = new IFoo[] { new Foo2(), new Foo(), new Foo() };
+            var instance = new Container().Map<IFoo, Foo>().Map(foos[0]).Map(foos[1]).Map(foos[2]).GetAll<IFoo>();
             Assert.IsType<Foo>(instance.First());
-            Assert.NotEqual(instance.First(), foos[1]);
+            Assert.Equal(instance.First(), foos[2]);
             Assert.Equal(foos, instance.Skip(1));
         }
 

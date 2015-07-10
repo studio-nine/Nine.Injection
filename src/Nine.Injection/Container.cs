@@ -94,6 +94,11 @@
         /// <inheritdoc />
         public void Map(Type type, object instance)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             if (freezed)
             {
                 throw new InvalidOperationException("Cannot map a type when the container is freezed");
@@ -102,6 +107,11 @@
             lock (syncRoot)
             {
                 Map(type, instance, false);
+
+                if (type != instance?.GetType())
+                {
+                    Map(instance.GetType(), instance, false);
+                }
             }
         }
 
