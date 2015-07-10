@@ -69,6 +69,18 @@
         }
 
         [Fact]
+        public void get_unmapped_type_with_static_constructor()
+        {
+            Assert.IsType<ClassWithStaticConstructor>(new Container().Get<ClassWithStaticConstructor>());
+        }
+
+        [Fact]
+        public void get_unmapped_type_with_private_constructor()
+        {
+            Assert.Equal(10, new Container().Get<ClassWithPrivateConstructors>().A);
+        }
+
+        [Fact]
         public void map_instance_to_interface_then_get_by_instance_type()
         {
             var foo = new Foo2();
@@ -89,7 +101,9 @@
         [Fact]
         public void get_respect_parameter_default_value()
         {
-            Assert.Equal("default", new Container().Get<ConstructorWithDefaultParameter>().String);
+            var container = new Container();
+            Assert.Equal("default", container.Get<ConstructorWithDefaultParameter>().String);
+            Assert.Equal(1, container.Get<ConstructorWithDefaultParameter>().Int);
         }
 
         [Fact]
