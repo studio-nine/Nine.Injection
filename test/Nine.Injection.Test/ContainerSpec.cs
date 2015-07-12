@@ -81,6 +81,12 @@
         }
 
         [Fact]
+        public void map_a_null_instance_should_succeeded()
+        {
+            Assert.Null(new Container().Map((IFoo)null).Get<IFoo>());
+        }
+
+        [Fact]
         public void map_instance_to_interface_then_get_by_instance_type()
         {
             var foo = new Foo2();

@@ -108,7 +108,7 @@
             {
                 Map(type, instance, false);
 
-                if (type != instance?.GetType())
+                if (instance != null && type != instance.GetType())
                 {
                     Map(instance.GetType(), instance, false);
                 }
