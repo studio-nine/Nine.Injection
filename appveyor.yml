@@ -8,5 +8,6 @@ install:
   - dnu restore
   - dnu pack src/Nine.Injection --configuration Release --out artifacts
   - dnx test\Nine.Injection.Test test
+build: off
 artifacts:
   - path: artifacts\*.nupkg
