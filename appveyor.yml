@@ -9,4 +9,4 @@ install:
   - dnx test\Nine.Injection.Test test
 build: off
 artifacts:
-  - path: artifacts\*.nupkg
+  - path: artifacts\**\*.nupkg
