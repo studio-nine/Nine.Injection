@@ -10,6 +10,9 @@
     /// Represents a constructor dependency injection container.
     /// </summary>
     public class Container : IContainer
+#if !PCL
+        , IServiceProvider
+#endif
     {
         private bool freezed;
         private readonly object syncRoot = new object();
@@ -23,7 +26,9 @@
         {
             funcFactory = new FuncFactory(this);
             Map(typeof(IContainer), this);
-            Map(typeof(Container), this);
+#if !PCL
+            Map(typeof(IServiceProvider), this);
+#endif
         }
 
         /// <summary>
@@ -308,7 +313,7 @@
                     var func = funcFactory.MakeFunc(typeof(Func<>).MakeGenericType(type.GenericTypeArguments[0]));
                     return Activator.CreateInstance(type, func);
                 }
-                
+
                 if (funcFactory.IsFuncDefinition(definition))
                 {
                     var arguments = type.GenericTypeArguments;
@@ -351,7 +356,7 @@
                     var parameterType = parameters[i].ParameterType;
                     if (parameterType.GetTypeInfo().IsValueType)
                     {
-                        constructorParams[i] = parameters[i].HasDefaultValue ? 
+                        constructorParams[i] = parameters[i].HasDefaultValue ?
                             parameters[i].DefaultValue : Activator.CreateInstance(parameterType);
                     }
                     else
@@ -369,7 +374,7 @@
         {
             if (parameterOverrides == null || parameterOverrides.Length <= 0)
             {
-                return MatchConstructor(type, null, 0,  false);
+                return MatchConstructor(type, null, 0, false);
             }
 
             var parameterTypes = new Type[parameterOverrides.Length];
@@ -380,7 +385,7 @@
 
             return MatchConstructor(type, parameterTypes, parameterTypes.Length, false);
         }
-        
+
         private ConstructorInfo MatchConstructor(TypeInfo type, Type[] parameterTypes, int length, bool strict)
         {
             ConstructorInfo constructor = null;
@@ -457,5 +462,9 @@
 
             return true;
         }
+
+#if !PCL
+        public object GetService(Type serviceType) => Get(serviceType);
+#endif
     }
 }

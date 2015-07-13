@@ -4,14 +4,9 @@ environment:
   VisualStudioVersion: 14.0
   DNX_FEED: https://www.nuget.org/api/v2
 install:
-  - dnvm install 1.0.0-beta4
+  - dnvm install 1.0.0-beta5
   - dnu restore
-test_script:
-  - cmd: dnx test\Nine.Injection.Test test
-deploy:
-- provider: NuGet
-  api_key:
-    secure: /Aez/maYDiX55BgGX9EkbhXBaBySsfdKifgB9SZxqySOrwtMVgPf7jOwS2XwKYJR
-  skip_symbols: true
-  on:
-    branch: master
+  - dnu pack src/Nine.Injection --configuration Release --out artifacts
+  - dnx test\Nine.Injection.Test test
+artifacts:
+  - path: artifacts\*.nupkg
