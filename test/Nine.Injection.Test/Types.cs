@@ -11,6 +11,11 @@
     class Foo : IFoo { }
     class Foo2 : IFoo, IFoo2 { }
 
+    struct StructFoo : IFoo
+    {
+        public int Value;
+    }
+
     class WeakFoo : IFoo
     {
         public static int InstanceCount;
@@ -149,6 +154,15 @@
         {
             this.Int = i;
             this.String = s;
+        }
+    }
+
+    class ConstructorWithDefaultStructParameter
+    {
+        public StructFoo Foo;
+        public ConstructorWithDefaultStructParameter(StructFoo foo)
+        {
+            this.Foo = foo;
         }
     }
 

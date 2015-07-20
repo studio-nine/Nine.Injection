@@ -28,6 +28,14 @@
         }
 
         [Fact]
+        public void add_then_get_an_struct_instance()
+        {
+            var foo = new StructFoo { Value = 10 };
+            Assert.Equal(10, ((StructFoo)new Container().Map<IFoo>(foo).Get<IFoo>()).Value);
+            Assert.Equal(10, ((StructFoo)new Container().Map(foo).Get<StructFoo>()).Value);
+        }
+
+        [Fact]
         public void add_to_the_same_type_should_override()
         {
             Assert.IsType<Foo2>(new Container().Map<IFoo>(new Foo2()).Get<IFoo>());
@@ -118,6 +126,20 @@
             var container = new Container();
             Assert.Equal("default", container.Get<ConstructorWithDefaultParameter>().String);
             Assert.Equal(1, container.Get<ConstructorWithDefaultParameter>().Int);
+        }
+
+        [Fact]
+        public void map_null_then_get_with_contructor_injection()
+        {
+            Assert.Equal(null, new Container().Map((string)null).Get<ConstructorWithDefaultParameter>().String);
+            Assert.Equal(10, new Container().Map(10).Get<ConstructorWithDefaultParameter>().Int);
+        }
+
+        [Fact]
+        public void get_respect_struct_parameter_default_value()
+        {
+            Assert.Equal(0, new Container().Get<ConstructorWithDefaultStructParameter>().Foo.Value);
+            Assert.Equal(10, new Container().Map(new StructFoo { Value = 10 }).Get<ConstructorWithDefaultStructParameter>().Foo.Value);
         }
 
         [Fact]
@@ -231,6 +253,19 @@
             Assert.NotNull(instance);
             Assert.IsType<Foo2>(instance.Foo);
             Assert.Collection(instance.Foos, e => Assert.IsType<Foo>(e), e => Assert.Equal(instance.Foo, e));
+        }
+
+        [Fact]
+        public void get_should_inject_struct_constructor_parameter()
+        {
+            var instance = new Container().Map<IFoo, Foo>().Map<IFoo>(new StructFoo { }).Map<IFoo>(new StructFoo { Value = 10 }).Get<ArrayConstructor>();
+            Assert.NotNull(instance);
+            Assert.IsType<StructFoo>(instance.Foo);
+            Assert.Equal(10, ((StructFoo)instance.Foo).Value);
+            Assert.Collection(instance.Foos,
+                e => Assert.IsType<Foo>(e),
+                e => Assert.Equal(0, ((StructFoo)e).Value),
+                e => Assert.Equal(10, ((StructFoo)e).Value));
         }
 
         [Fact]

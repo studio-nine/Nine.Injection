@@ -19,7 +19,7 @@
         {
             this.hasValue = true;
 
-            if (weak)
+            if (weak && value != null)
             {
                 this.weakValue = new WeakReference<object>(value);
             }
@@ -55,6 +55,11 @@
         /// Gets the type of concrete class to be instantiated when from is resolved from the container.
         /// </summary>
         public Type To { get; internal set; }
+
+        /// <summary>
+        /// Gets whether the type or instance is explicity mapped.
+        /// </summary>
+        public bool IsExplicit { get; internal set; }
 
         /// <inheritdoc />
         public override string ToString() => $"{From} -> {To}";

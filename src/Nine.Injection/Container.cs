@@ -81,6 +81,7 @@
                 {
                     From = from,
                     To = to,
+                    IsExplicit = true,
                     DefaultParameterOverrides = parameterOverrides
                 });
 
@@ -90,6 +91,7 @@
                     {
                         From = from,
                         To = to,
+                        IsExplicit = true,
                         DefaultParameterOverrides = parameterOverrides
                     });
                 }
@@ -127,7 +129,7 @@
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var mapping = new TypeMap { From = type };
+            var mapping = new TypeMap { From = type, IsExplicit = true };
             mapping.SetValue(instance, weak);
             if (instance != null)
             {
@@ -143,7 +145,7 @@
             lock (syncRoot)
             {
                 dependencyTracker.Clear();
-                return GetCore(type, null);
+                return GetCore(type, null).Object;
             }
         }
 
@@ -153,23 +155,12 @@
             lock (syncRoot)
             {
                 dependencyTracker.Clear();
-                return GetCore(type, parameterOverrides);
+                return GetCore(type, parameterOverrides).Object;
             }
         }
 
-        private object GetCore(Type type, object[] parameterOverrides)
+        private GetResult GetCore(Type type, object[] parameterOverrides)
         {
-            var ti = type.GetTypeInfo();
-            if (ti.IsPrimitive || ti.IsValueType)
-            {
-                return Activator.CreateInstance(type);
-            }
-
-            if (type == typeof(string))
-            {
-                return null;
-            }
-
             var parameterizedType = new ParameterizedType(type, parameterOverrides, EqualityComparer);
             var mappings = GetMappings(parameterizedType);
             var hasMapping = mappings.Count > 0;
@@ -180,7 +171,7 @@
                 object result;
                 if (map.TryGetValue(out result))
                 {
-                    return result;
+                    return new GetResult { Object = result, IsExplicitlyMapped = map.IsExplicit };
                 }
 
                 if (map.To != type && map.To != null)
@@ -202,7 +193,7 @@
                 mappings.Add(map);
             }
 
-            return instance;
+            return new GetResult { Object = instance, IsExplicitlyMapped = false };
         }
 
         /// <inheritdoc />
@@ -233,7 +224,7 @@
                     }
                     else
                     {
-                        result[i] = GetCore(mappings[i].To, mappings[i].DefaultParameterOverrides);
+                        result[i] = GetCore(mappings[i].To, mappings[i].DefaultParameterOverrides).Object;
                     }
                 }
             }
@@ -331,6 +322,19 @@
                 return null;
             }
 
+            if (parameterOverrides == null || parameterOverrides.Length == 0)
+            {
+                if (ti.IsPrimitive || ti.IsValueType)
+                {
+                    return Activator.CreateInstance(type);
+                }
+
+                if (type == typeof(string))
+                {
+                    return null;
+                }
+            }
+
             var constructor = MatchConstructor(ti, parameterOverrides);
             if (constructor == null)
             {
@@ -354,15 +358,14 @@
                 else
                 {
                     var parameterType = parameters[i].ParameterType;
-                    if (parameterType.GetTypeInfo().IsValueType)
+                    var getResult = GetCore(parameterType, null);
+                    if (getResult.IsExplicitlyMapped || !parameters[i].HasDefaultValue)
                     {
-                        constructorParams[i] = parameters[i].HasDefaultValue ?
-                            parameters[i].DefaultValue : Activator.CreateInstance(parameterType);
+                        constructorParams[i] = getResult.Object;
                     }
                     else
                     {
-                        constructorParams[i] = GetCore(parameterType, null)
-                            ?? (parameters[i].HasDefaultValue ? parameters[i].DefaultValue : null);
+                        constructorParams[i] = parameters[i].DefaultValue;
                     }
                 }
             }
@@ -466,5 +469,11 @@
 #if !PCL
         public object GetService(Type serviceType) => Get(serviceType);
 #endif
+
+        struct GetResult
+        {
+            public object Object;
+            public bool IsExplicitlyMapped;
+        }
     }
 }
