@@ -85,6 +85,17 @@
                     DefaultParameterOverrides = parameterOverrides
                 });
 
+                if (from != to)
+                {
+                    GetMappings(new ParameterizedType(to, null, EqualityComparer)).Add(new TypeMap
+                    {
+                        From = to,
+                        To = to,
+                        IsExplicit = true,
+                        DefaultParameterOverrides = parameterOverrides
+                    });
+                }
+
                 if (parameterOverrides != null && parameterOverrides.Length > 0)
                 {
                     GetMappings(new ParameterizedType(from, parameterOverrides?.ToArray(), EqualityComparer)).Add(new TypeMap
@@ -94,6 +105,17 @@
                         IsExplicit = true,
                         DefaultParameterOverrides = parameterOverrides
                     });
+
+                    if (from != to)
+                    {
+                        GetMappings(new ParameterizedType(to, parameterOverrides?.ToArray(), EqualityComparer)).Add(new TypeMap
+                        {
+                            From = to,
+                            To = to,
+                            IsExplicit = true,
+                            DefaultParameterOverrides = parameterOverrides
+                        });
+                    }
                 }
             }
         }
@@ -178,6 +200,8 @@
                 {
                     return GetCore(map.To, map.DefaultParameterOverrides);
                 }
+
+                parameterOverrides = parameterOverrides ?? map.DefaultParameterOverrides;
             }
 
             var instance = Instantiate(type, parameterOverrides);
@@ -193,7 +217,7 @@
                 mappings.Add(map);
             }
 
-            return new GetResult { Object = instance, IsExplicitlyMapped = false };
+            return new GetResult { Object = instance, IsExplicitlyMapped = map.IsExplicit };
         }
 
         /// <inheritdoc />
@@ -290,7 +314,10 @@
                 if (mappings.Count > 0)
                 {
                     var map = mappings[mappings.Count - 1];
-                    return InstantiateCore(map.To.MakeGenericType(type.GetTypeInfo().GenericTypeArguments), parameterOverrides);
+                    if (map.To != definition)
+                    {
+                        return InstantiateCore(map.To.MakeGenericType(type.GetTypeInfo().GenericTypeArguments), parameterOverrides);
+                    }
                 }
 
                 // Handle well known generic types
