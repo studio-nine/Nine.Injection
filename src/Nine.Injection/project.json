@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.2.0-alpha2-*",
+  "version": "1.2.0-alpha3-*",
   "description": "A portable lightweight constructor injection library for singleton objects",
   "authors": [ "Yufei Huang" ],
   "tags": [ "PCL", "Portable", "IOC", "Constructor Injection", "Dependency Injection" ],
@@ -7,35 +7,10 @@
   "projectUrl": "https://github.com/studio-nine/Nine.Injection",
   "licenseUrl": "https://github.com/studio-nine/Nine.Injection/blob/master/LICENSE",
 
-  "dependencies": {
-  },
-
   "frameworks": {
-    "dnx451": { },
-    "dnxcore50": {
+    "dotnet": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.0-*",
-        "System.Collections": "4.0.10-*",
-        "System.ComponentModel": "4.0.0-*",
-        "System.Linq": "4.0.0-*",
-        "System.Reflection.Extensions": "4.0.0-*",
-        "System.Runtime.Extensions": "4.0.10-*",
-        "System.Threading": "4.0.10-*"
-      }
-    },
-    ".NETPortable,Version=v4.5,Profile=Profile78": {
-      "frameworkAssemblies": {
-        "System.Linq": "",
-        "System.Runtime": "",
-        "System.Runtime.Extensions": "",
-        "System.Reflection": "",
-        "System.Threading": "",
-        "System.Threading.Tasks": "",
-        "System.Collections": "",
-        "System.Reflection.Extensions": ""
-      },
-      "compilationOptions": {
-        "define": [ "PCL" ]
+        "Microsoft.NETCore": "5.0.0"
       }
     }
   }
