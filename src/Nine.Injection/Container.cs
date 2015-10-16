@@ -20,6 +20,7 @@
         private readonly Dictionary<ParameterizedType, List<TypeMap>> _mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
         private readonly HashSet<Type> _dependencyTracker = new HashSet<Type>();
         private readonly Stack<Type> _instantiationStack = new Stack<Type>();
+        private readonly Lazy<Dictionary<Type, PropertyInfo>> _lazyValueProperties = new Lazy<Dictionary<Type, PropertyInfo>>(() => new Dictionary<Type, PropertyInfo>(), isThreadSafe: false);
 
         /// <inheritdoc />
         public Container()
@@ -202,6 +203,20 @@
                 }
 
                 parameterOverrides = parameterOverrides ?? map.DefaultParameterOverrides;
+            }
+
+            if (parameterOverrides == null || parameterOverrides.Length == 0)
+            {
+                var lazyMappings = GetMappings(new ParameterizedType(typeof(Lazy<>).MakeGenericType(type), null, EqualityComparer));
+                if (lazyMappings.Count > 0)
+                {
+                    object result;
+                    var lazyMap = lazyMappings[lazyMappings.Count - 1];
+                    if (lazyMap.TryGetValue(out result) && result != null)
+                    {
+                        return new GetResult { Object = GetLazyValue(result), IsExplicitlyMapped = lazyMap.IsExplicit };
+                    }
+                }
             }
 
             var instance = Instantiate(type, parameterOverrides);
@@ -493,6 +508,20 @@
             return true;
         }
 
+        private object GetLazyValue(object lazy)
+        {
+            PropertyInfo pi;
+
+            var type = lazy.GetType();
+
+            if (!_lazyValueProperties.Value.TryGetValue(type, out pi))
+            {
+                _lazyValueProperties.Value[type] = pi = type.GetTypeInfo().DeclaredProperties.First(p => p.Name == "Value");
+            }
+
+            return pi.GetValue(lazy);
+        }
+
 #if !PCL
         public object GetService(Type serviceType) => Get(serviceType);
 #endif
@@ -500,7 +529,10 @@
         struct GetResult
         {
             public object Object;
+
             public bool IsExplicitlyMapped;
+
+            public bool HasResult => IsExplicitlyMapped || Object != null;
         }
     }
 }

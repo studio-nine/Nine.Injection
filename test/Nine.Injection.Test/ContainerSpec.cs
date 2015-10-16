@@ -190,6 +190,12 @@
         }
 
         [Fact]
+        public void lazy_registration()
+        {
+            Assert.IsType<Foo>(new Container().Map(new Lazy<IFoo>(() => new Foo())).Get<Bar>().Foo);
+        }
+
+        [Fact]
         public void func_can_resolve_circular_dependency()
         {
             var ping = new Container().Map<IPing, Ping>().Map<IPong, PongFunc>().Get<IPing>();
