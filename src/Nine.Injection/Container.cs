@@ -14,17 +14,17 @@
         , IServiceProvider
 #endif
     {
-        private bool freezed;
-        private readonly object syncRoot = new object();
-        private readonly FuncFactory funcFactory;
-        private readonly Dictionary<ParameterizedType, List<TypeMap>> mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
-        private readonly HashSet<Type> dependencyTracker = new HashSet<Type>();
-        private readonly Stack<Type> instantiationStack = new Stack<Type>();
+        private bool _freezed;
+        private readonly object _syncRoot = new object();
+        private readonly FuncFactory _funcFactory;
+        private readonly Dictionary<ParameterizedType, List<TypeMap>> _mappings = new Dictionary<ParameterizedType, List<TypeMap>>();
+        private readonly HashSet<Type> _dependencyTracker = new HashSet<Type>();
+        private readonly Stack<Type> _instantiationStack = new Stack<Type>();
 
         /// <inheritdoc />
         public Container()
         {
-            funcFactory = new FuncFactory(this);
+            _funcFactory = new FuncFactory(this);
             Map(typeof(IContainer), this);
 #if !PCL
             Map(typeof(IServiceProvider), this);
@@ -36,7 +36,7 @@
         /// </summary>
         public IEnumerable<TypeMap> Mappings
         {
-            get { return mappings.SelectMany(m => m.Value).Where(m => m.To != null); }
+            get { return _mappings.SelectMany(m => m.Value).Where(m => m.To != null); }
         }
 
         /// <summary>
@@ -50,7 +50,7 @@
         /// <returns></returns>
         public IContainer Freeze()
         {
-            freezed = true;
+            _freezed = true;
             return this;
         }
 
@@ -60,7 +60,7 @@
         /// <inheritdoc />
         public void Map(Type from, Type to, params object[] parameterOverrides)
         {
-            if (freezed)
+            if (_freezed)
             {
                 throw new InvalidOperationException("Cannot map a type when the container is freezed");
             }
@@ -75,7 +75,7 @@
                 throw new ArgumentNullException(nameof(to));
             }
 
-            lock (syncRoot)
+            lock (_syncRoot)
             {
                 GetMappings(new ParameterizedType(from, null, EqualityComparer)).Add(new TypeMap
                 {
@@ -128,12 +128,12 @@
                 throw new ArgumentNullException(nameof(type));
             }
 
-            if (freezed)
+            if (_freezed)
             {
                 throw new InvalidOperationException("Cannot map a type when the container is freezed");
             }
 
-            lock (syncRoot)
+            lock (_syncRoot)
             {
                 Map(type, instance, false);
 
@@ -164,9 +164,9 @@
         /// <inheritdoc />
         public object Get(Type type)
         {
-            lock (syncRoot)
+            lock (_syncRoot)
             {
-                dependencyTracker.Clear();
+                _dependencyTracker.Clear();
                 return GetCore(type, null).Object;
             }
         }
@@ -174,9 +174,9 @@
         /// <inheritdoc />
         public object Get(Type type, params object[] parameterOverrides)
         {
-            lock (syncRoot)
+            lock (_syncRoot)
             {
-                dependencyTracker.Clear();
+                _dependencyTracker.Clear();
                 return GetCore(type, parameterOverrides).Object;
             }
         }
@@ -223,9 +223,9 @@
         /// <inheritdoc />
         public IEnumerable GetAll(Type type)
         {
-            lock (syncRoot)
+            lock (_syncRoot)
             {
-                dependencyTracker.Clear();
+                _dependencyTracker.Clear();
                 return GetAllCore(type);
             }
         }
@@ -233,7 +233,7 @@
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
-            this.mappings.TryGetValue(new ParameterizedType(type, null, EqualityComparer), out mappings);
+            this._mappings.TryGetValue(new ParameterizedType(type, null, EqualityComparer), out mappings);
 
             IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
             if (result.Count > 0)
@@ -258,22 +258,22 @@
         private List<TypeMap> GetMappings(ParameterizedType type)
         {
             List<TypeMap> result;
-            if (!mappings.TryGetValue(type, out result))
+            if (!_mappings.TryGetValue(type, out result))
             {
-                mappings.Add(type, result = new List<TypeMap>());
+                _mappings.Add(type, result = new List<TypeMap>());
             }
             return result;
         }
 
         private object Instantiate(Type type, object[] parameterOverrides)
         {
-            if (dependencyTracker.Contains(type))
+            if (_dependencyTracker.Contains(type))
             {
                 throw new ArgumentException($"Circular dependency detected while resolving type { type.FullName }.");
             }
 
-            dependencyTracker.Add(type);
-            instantiationStack.Push(type);
+            _dependencyTracker.Add(type);
+            _instantiationStack.Push(type);
 
             try
             {
@@ -287,14 +287,14 @@
             }
             catch (Exception e)
             {
-                var path = string.Join(" -> ", instantiationStack.Select(t => t.FullName).Reverse());
+                var path = string.Join(" -> ", _instantiationStack.Select(t => t.FullName).Reverse());
                 var exceptionText = $"Error instantiating { type.FullName }, please consider the following constructor path: { path }";
                 throw new TargetInvocationException(exceptionText, e);
             }
             finally
             {
-                dependencyTracker.Remove(type);
-                instantiationStack.Pop();
+                _dependencyTracker.Remove(type);
+                _instantiationStack.Pop();
             }
         }
 
@@ -328,17 +328,17 @@
 
                 if (definition == typeof(Lazy<>))
                 {
-                    var func = funcFactory.MakeFunc(typeof(Func<>).MakeGenericType(type.GenericTypeArguments[0]));
+                    var func = _funcFactory.MakeFunc(typeof(Func<>).MakeGenericType(type.GenericTypeArguments[0]));
                     return Activator.CreateInstance(type, func);
                 }
 
-                if (funcFactory.IsFuncDefinition(definition))
+                if (_funcFactory.IsFuncDefinition(definition))
                 {
                     var arguments = type.GenericTypeArguments;
                     var funcReturnType = arguments.Last().GetTypeInfo();
                     if (arguments.Length == 1 || MatchConstructor(funcReturnType, arguments, arguments.Length - 1, true) != null)
                     {
-                        return funcFactory.MakeFunc(type);
+                        return _funcFactory.MakeFunc(type);
                     }
                 }
             }

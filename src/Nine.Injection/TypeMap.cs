@@ -9,40 +9,40 @@
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class TypeMap
     {
-        private bool hasValue;
-        private WeakReference<object> weakValue;
-        private object value;
+        private bool _hasValue;
+        private WeakReference<object> _weakValue;
+        private object _value;
 
         internal object[] DefaultParameterOverrides;
 
         internal void SetValue(object value, bool weak)
         {
-            this.hasValue = true;
+            _hasValue = true;
 
             if (weak && value != null)
             {
-                this.weakValue = new WeakReference<object>(value);
+                _weakValue = new WeakReference<object>(value);
             }
             else
             {
-                this.value = value;
+                _value = value;
             }
         }
 
         internal bool TryGetValue(out object target)
         {
-            if (!hasValue)
+            if (!_hasValue)
             {
                 target = null;
                 return false;
             }
 
-            if (weakValue != null)
+            if (_weakValue != null)
             {
-                return weakValue.TryGetTarget(out target);
+                return _weakValue.TryGetTarget(out target);
             }
 
-            target = value;
+            target = _value;
             return true;
         }
 
