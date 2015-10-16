@@ -409,10 +409,14 @@
             Assert.Equal(1234, new Container()
                 .Map<IPerInstanceParameter, PerInstanceParameter>(1234)
                 .Get<IPerInstanceParameter[]>()[0].Id);
-
+            
             Assert.Equal(1234, new Container()
                 .Map<IPerInstanceParameter, PerInstanceParameter3>("1234")
                 .Get<PerInstanceParameterConsumer>().Id);
+
+            Assert.Null(new Container()
+                .Map<IPerInstanceParameter, PerInstanceParameter3>("1234", null)
+                .Get<PerInstanceParameterConsumer>().Obj.Foo);
         }
 
         [Fact]

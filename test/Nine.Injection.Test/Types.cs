@@ -143,6 +143,7 @@
     class PerInstanceParameterConsumer
     {
         private readonly PerInstanceParameter3 _p;
+        public PerInstanceParameter3 Obj => _p;
         public int Id => _p.Id;
         public PerInstanceParameterConsumer(PerInstanceParameter3 p) { _p = p; }
     }
