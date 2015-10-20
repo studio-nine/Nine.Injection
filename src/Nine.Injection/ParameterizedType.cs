@@ -42,6 +42,11 @@
                 return true;
             }
 
+            if (Parameters == null || other.Parameters == null)
+            {
+                return false;
+            }
+
             var count = Parameters.Length;
             for (var i = 0; i < count; i++)
             {
