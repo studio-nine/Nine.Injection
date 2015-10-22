@@ -165,10 +165,12 @@
     {
         public int Int;
         public string String;
-        public ConstructorWithDefaultParameter(int i = 1, string s = "default")
+        public Bar Bar;
+        public ConstructorWithDefaultParameter(int i = 1, string s = "default", Bar bar = null)
         {
             this.Int = i;
             this.String = s;
+            this.Bar = bar;
         }
     }
 

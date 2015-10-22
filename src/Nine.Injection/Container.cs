@@ -401,7 +401,7 @@
                 {
                     var parameterType = parameters[i].ParameterType;
                     var getResult = GetCore(parameterType, null);
-                    if (getResult.IsExplicitlyMapped || !parameters[i].HasDefaultValue)
+                    if (getResult.IsExplicitlyMapped || !parameters[i].HasDefaultValue || parameters[i].DefaultValue == null)
                     {
                         constructorParams[i] = getResult.Object;
                     }

@@ -126,6 +126,10 @@
             var container = new Container();
             Assert.Equal("default", container.Get<ConstructorWithDefaultParameter>().String);
             Assert.Equal(1, container.Get<ConstructorWithDefaultParameter>().Int);
+            Assert.NotNull(container.Get<ConstructorWithDefaultParameter>().Bar);
+
+            Assert.Null(new Container().Get<ConstructorWithDefaultParameter>().Bar.Foo);
+            Assert.NotNull(new Container().Map<IFoo, Foo>().Get<ConstructorWithDefaultParameter>().Bar.Foo);
         }
 
         [Fact]
