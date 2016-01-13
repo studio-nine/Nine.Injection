@@ -22,9 +22,20 @@
         private readonly Stack<Type> _instantiationStack = new Stack<Type>();
         private readonly Lazy<Dictionary<Type, PropertyInfo>> _lazyValueProperties = new Lazy<Dictionary<Type, PropertyInfo>>(() => new Dictionary<Type, PropertyInfo>(), isThreadSafe: false);
 
+        private readonly bool _resolveFunc;
+        private readonly bool _resolveLazy;
+
         /// <inheritdoc />
-        public Container()
+        public Container() : this(ContainerOptions.Default) { }
+
+        /// <inheritdoc />
+        public Container(ContainerOptions options)
         {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            
+            _resolveFunc = options.ResolveFunc;
+            _resolveLazy = options.ResolveLazy;
+            
             _funcFactory = new FuncFactory(this);
             Map(typeof(IContainer), this);
 #if !PCL
@@ -341,13 +352,13 @@
                     return GetAllCore(type.GenericTypeArguments[0]);
                 }
 
-                if (definition == typeof(Lazy<>))
+                if (_resolveLazy && definition == typeof(Lazy<>))
                 {
                     var func = _funcFactory.MakeFunc(typeof(Func<>).MakeGenericType(type.GenericTypeArguments[0]));
                     return Activator.CreateInstance(type, func);
                 }
 
-                if (_funcFactory.IsFuncDefinition(definition))
+                if (_resolveFunc && _funcFactory.IsFuncDefinition(definition))
                 {
                     var arguments = type.GenericTypeArguments;
                     var funcReturnType = arguments.Last().GetTypeInfo();

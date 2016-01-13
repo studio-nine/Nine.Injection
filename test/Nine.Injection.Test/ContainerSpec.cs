@@ -202,7 +202,7 @@
         [Fact]
         public void func_can_resolve_circular_dependency()
         {
-            var ping = new Container().Map<IPing, Ping>().Map<IPong, PongFunc>().Get<IPing>();
+            var ping = new Container(new ContainerOptions { ResolveFunc = true }).Map<IPing, Ping>().Map<IPong, PongFunc>().Get<IPing>();
             Assert.Equal(ping, ping.Pong.Ping);
         }
 
@@ -210,7 +210,7 @@
         public void can_override_the_default_func_implementation_provided_by_the_container()
         {
             var ping1 = new Ping(null);
-            var ping = new Container().Map<IPing, Ping>().Map<IPong, PongFunc>().Map(new Func<IPing>(() => ping1)).Get<IPing>();
+            var ping = new Container(new ContainerOptions { ResolveFunc = true }).Map<IPing, Ping>().Map<IPong, PongFunc>().Map(new Func<IPing>(() => ping1)).Get<IPing>();
             Assert.Equal(ping1, ping.Pong.Ping);
             Assert.NotEqual(ping1, ping);
         }
@@ -386,10 +386,18 @@
         }
 
         [Fact]
-        public void use_func_as_the_factory_to_create_instance_with_custom_parameters()
+        public void resolve_func_is_disabled_by_default()
         {
             var a = new Foo();
             var factory = new Container().Map<IFoo, Foo>().Get<DependsOnPerInstanceParameter>();
+            Assert.Null(factory.Factory);
+        }
+        
+        [Fact]
+        public void use_func_as_the_factory_to_create_instance_with_custom_parameters()
+        {
+            var a = new Foo();
+            var factory = new Container(new ContainerOptions { ResolveFunc = true }).Map<IFoo, Foo>().Get<DependsOnPerInstanceParameter>();
             Assert.Equal(10, factory.Factory(10).Id);
             Assert.Equal(a, factory.Factory2(10, a).Foo);
         }
@@ -397,16 +405,16 @@
         [Fact]
         public void it_should_only_inject_func_when_the_return_type_contains_a_matching_constructor()
         {
-            Assert.NotNull(new Container().Get<Func<int, PerInstanceParameter2>>());
-            Assert.NotNull(new Container().Get<Func<int, IFoo, PerInstanceParameter2>>());
-            Assert.NotNull(new Container().Get<Func<string, IFoo, PerInstanceParameter2>>());
+            Assert.NotNull(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<int, PerInstanceParameter2>>());
+            Assert.NotNull(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<int, IFoo, PerInstanceParameter2>>());
+            Assert.NotNull(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<string, IFoo, PerInstanceParameter2>>());
 
-            Assert.Null(new Container().Get<Func<long, IFoo>>());
-            Assert.Null(new Container().Get<Func<long, Foo>>());
+            Assert.Null(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<long, IFoo>>());
+            Assert.Null(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<long, Foo>>());
 
-            Assert.Null(new Container().Get<Func<int, IFooDerived, PerInstanceParameter2>>());
-            Assert.Null(new Container().Get<Func<long, PerInstanceParameter2>>());
-            Assert.Null(new Container().Get<Func<long, IFoo2, PerInstanceParameter2>>());
+            Assert.Null(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<int, IFooDerived, PerInstanceParameter2>>());
+            Assert.Null(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<long, PerInstanceParameter2>>());
+            Assert.Null(new Container(new ContainerOptions { ResolveFunc = true }).Get<Func<long, IFoo2, PerInstanceParameter2>>());
         }
 
         [Fact]
