@@ -146,7 +146,7 @@
         /// <typeparam name="T">The type of interface or class to be registered</typeparam>
         /// <param name="instances">The instances to register in the container</param>
         /// <returns>The container, complete with new registration</returns>
-        public static IContainer Map<T>(this IContainer container, params T[] instances)
+        public static IContainer MapAll<T>(this IContainer container, params T[] instances)
         {
             foreach (var instance in instances)
             {
