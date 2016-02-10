@@ -108,16 +108,8 @@
         public void container_itself_it_mapped_automatically()
         {
             var container = new Container();
-            Assert.True(container is IServiceProvider);
             Assert.Equal(container, container.Get<IContainer>());
             Assert.Equal(container, container.Get<Container>());
-        }
-
-        [Fact]
-        public void service_provider_is_mapped_automatically()
-        {
-            var container = new Container();
-            Assert.Same(container, container.Get<IServiceProvider>());
         }
 
         [Fact]

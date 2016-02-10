@@ -10,9 +10,6 @@
     /// Represents a constructor dependency injection container.
     /// </summary>
     public class Container : IContainer
-#if !PCL
-        , IServiceProvider
-#endif
     {
         private bool _freezed;
         private readonly object _syncRoot = new object();
@@ -38,9 +35,6 @@
             
             _funcFactory = new FuncFactory(this);
             Map(typeof(IContainer), this);
-#if !PCL
-            Map(typeof(IServiceProvider), this);
-#endif
         }
 
         /// <summary>
