@@ -9,7 +9,7 @@
     /// <summary>
     /// Represents a constructor dependency injection container.
     /// </summary>
-    public class Container : IContainer
+    public class Container : IContainer, IDisposable
     {
         private bool _freezed;
         private readonly object _syncRoot = new object();
@@ -527,9 +527,25 @@
             return pi.GetValue(lazy);
         }
 
-#if !PCL
-        public object GetService(Type serviceType) => Get(serviceType);
-#endif
+        public void Dispose()
+        {
+            object target;
+
+            foreach (var value in _mappings.Values)
+            {
+                foreach (var typeMap in value)
+                {
+                    if (typeMap.TryGetValue(out target) && target != this)
+                    {
+                        var disposable = target as IDisposable;
+                        if (disposable != null)
+                        {
+                            disposable.Dispose();
+                        }
+                    }
+                }
+            }
+        }
 
         struct GetResult
         {

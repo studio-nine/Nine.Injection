@@ -16,6 +16,12 @@
         public int Value;
     }
 
+    class DisposableFoo : IFoo, IDisposable
+    {
+        public bool IsDisposed;
+        public void Dispose() { IsDisposed = true; }
+    }
+
     class WeakFoo : IFoo
     {
         public static int InstanceCount;

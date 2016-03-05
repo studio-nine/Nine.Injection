@@ -113,6 +113,15 @@
         }
 
         [Fact]
+        public void dispose_container()
+        {
+            var container = new Container();
+            var foo = (DisposableFoo)container.Map<IFoo, DisposableFoo>().Get<IFoo>();
+            container.Dispose();
+            Assert.True(foo.IsDisposed);
+        }
+
+        [Fact]
         public void get_respect_parameter_default_value()
         {
             var container = new Container();
