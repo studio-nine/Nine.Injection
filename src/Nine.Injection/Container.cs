@@ -212,14 +212,30 @@
 
             if (parameterOverrides == null || parameterOverrides.Length == 0)
             {
-                var lazyMappings = GetMappings(new ParameterizedType(typeof(Lazy<>).MakeGenericType(type), null, EqualityComparer));
-                if (lazyMappings.Count > 0)
+                if (_resolveLazy)
                 {
-                    object result;
-                    var lazyMap = lazyMappings[lazyMappings.Count - 1];
-                    if (lazyMap.TryGetValue(out result) && result != null)
+                    var lazyMappings = GetMappings(new ParameterizedType(typeof(Lazy<>).MakeGenericType(type), null, EqualityComparer));
+                    if (lazyMappings.Count > 0)
                     {
-                        return new GetResult { Object = GetLazyValue(result), IsExplicitlyMapped = lazyMap.IsExplicit };
+                        object result;
+                        var lazyMap = lazyMappings[lazyMappings.Count - 1];
+                        if (lazyMap.TryGetValue(out result) && result != null)
+                        {
+                            return new GetResult { Object = GetLazyValue(result), IsExplicitlyMapped = lazyMap.IsExplicit };
+                        }
+                    }
+                }
+                if (_resolveFunc)
+                {
+                    var funcMappings = GetMappings(new ParameterizedType(typeof(Func<>).MakeGenericType(type), null, EqualityComparer));
+                    if (funcMappings.Count > 0)
+                    {
+                        object result;
+                        var funcMap = funcMappings[funcMappings.Count - 1];
+                        if (funcMap.TryGetValue(out result) && result != null)
+                        {
+                            return new GetResult { Object = ((Delegate)result).DynamicInvoke(), IsExplicitlyMapped = funcMap.IsExplicit };
+                        }
                     }
                 }
             }

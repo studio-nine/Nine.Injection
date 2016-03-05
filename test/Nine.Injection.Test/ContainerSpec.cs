@@ -197,7 +197,16 @@
         [Fact]
         public void lazy_registration()
         {
-            Assert.IsType<Foo>(new Container().Map(new Lazy<IFoo>(() => new Foo())).Get<Bar>().Foo);
+            var foo = new Foo();
+            Assert.Equal(foo, new Container().Map(new Lazy<IFoo>(() => foo)).Get<Bar>().Foo);
+        }
+
+        [Fact]
+        public void func_registration()
+        {
+            var foo = new Foo();
+            Assert.Null(new Container().Map(new Func<IFoo>(() => foo)).Get<Bar>().Foo);
+            Assert.Equal(foo, new Container(new ContainerOptions { ResolveFunc = true }).Map(new Func<IFoo>(() => foo)).Get<Bar>().Foo);
         }
 
         [Fact]
