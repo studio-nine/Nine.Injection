@@ -140,6 +140,19 @@
         }
 
         /// <summary>
+        /// Map a lazy initialized instance of a concrete implementation for an interface or class
+        /// </summary>
+        /// <param name="container">The container</param>
+        /// <typeparam name="T">The type of interface or class to be registered</typeparam>
+        /// <param name="factory">The instance to register in the container</param>
+        /// <returns>The container, complete with new registration</returns>
+        public static IContainer MapLazy<T>(this IContainer container, Func<T> factory)
+        {
+            container.Map(typeof(Lazy<T>), new Lazy<T>(factory));
+            return container;
+        }
+
+        /// <summary>
         /// Map a specific instance of a concrete implementation for an interface or class
         /// </summary>
         /// <param name="container">The container</param>
