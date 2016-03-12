@@ -16,6 +16,21 @@
         "System.Runtime": "4.0.20",
         "System.Threading": "4.0.0"
       }
+    },
+    ".NETPortable,Version=v4.5,Profile=Profile7": {
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System": "",
+        "System.Collections": "",
+        "System.Core": "",
+        "System.IO": "",
+        "System.Linq": "",
+        "System.Reflection": "",
+        "System.Reflection.Extensions": "",
+        "System.Runtime": "",
+        "System.Text.Encoding": "",
+        "System.Threading": ""
+      }
     }
   }
 }

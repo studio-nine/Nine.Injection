@@ -496,7 +496,7 @@
             }
 
             // Find best matching constructor using the input parameters
-            var minLength = Math.Min(candidateParameters.Length, length);
+            var minLength = candidateParameters.Length > length ? length : candidateParameters.Length;
 
             for (int i = 0; i < minLength; i++)
             {
