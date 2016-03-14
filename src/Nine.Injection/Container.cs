@@ -21,6 +21,7 @@
 
         private readonly bool _resolveFunc;
         private readonly bool _resolveLazy;
+        private readonly IEqualityComparer<object> _equalityComparer;
 
         /// <inheritdoc />
         public Container() : this(ContainerOptions.Default) { }
@@ -29,10 +30,11 @@
         public Container(ContainerOptions options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            
+
             _resolveFunc = options.ResolveFunc;
             _resolveLazy = options.ResolveLazy;
-            
+            _equalityComparer = options.EqualityComparer;
+
             _funcFactory = new FuncFactory(this);
             Map(typeof(IContainer), this);
         }
@@ -44,11 +46,6 @@
         {
             get { return _mappings.SelectMany(m => m.Value).Where(m => m.To != null); }
         }
-
-        /// <summary>
-        /// Gets or sets the equality comparer to compare the equality of parameter objects.
-        /// </summary>
-        public IEqualityComparer<object> EqualityComparer { get; set; }
 
         /// <summary>
         /// Freezes this container and returns the freezed (this) instance.
@@ -83,7 +80,7 @@
 
             lock (_syncRoot)
             {
-                GetMappings(new ParameterizedType(from, null, EqualityComparer)).Add(new TypeMap
+                GetMappings(new ParameterizedType(from, null, _equalityComparer)).Add(new TypeMap
                 {
                     From = from,
                     To = to,
@@ -93,7 +90,7 @@
 
                 if (from != to)
                 {
-                    GetMappings(new ParameterizedType(to, null, EqualityComparer)).Add(new TypeMap
+                    GetMappings(new ParameterizedType(to, null, _equalityComparer)).Add(new TypeMap
                     {
                         From = to,
                         To = to,
@@ -104,7 +101,7 @@
 
                 if (parameterOverrides != null && parameterOverrides.Length > 0)
                 {
-                    GetMappings(new ParameterizedType(from, parameterOverrides?.ToArray(), EqualityComparer)).Add(new TypeMap
+                    GetMappings(new ParameterizedType(from, parameterOverrides?.ToArray(), _equalityComparer)).Add(new TypeMap
                     {
                         From = from,
                         To = to,
@@ -114,7 +111,7 @@
 
                     if (from != to)
                     {
-                        GetMappings(new ParameterizedType(to, parameterOverrides?.ToArray(), EqualityComparer)).Add(new TypeMap
+                        GetMappings(new ParameterizedType(to, parameterOverrides?.ToArray(), _equalityComparer)).Add(new TypeMap
                         {
                             From = to,
                             To = to,
@@ -164,7 +161,7 @@
                 mapping.To = instance.GetType();
             }
 
-            GetMappings(new ParameterizedType(type, null, EqualityComparer)).Add(mapping);
+            GetMappings(new ParameterizedType(type, null, _equalityComparer)).Add(mapping);
         }
 
         /// <inheritdoc />
@@ -189,7 +186,7 @@
 
         private GetResult GetCore(Type type, object[] parameterOverrides)
         {
-            var parameterizedType = new ParameterizedType(type, parameterOverrides, EqualityComparer);
+            var parameterizedType = new ParameterizedType(type, parameterOverrides, _equalityComparer);
             var mappings = GetMappings(parameterizedType);
             var hasMapping = mappings.Count > 0;
             var map = hasMapping ? mappings[mappings.Count - 1] : new TypeMap { From = type };
@@ -214,7 +211,7 @@
             {
                 if (_resolveLazy)
                 {
-                    var lazyMappings = GetMappings(new ParameterizedType(typeof(Lazy<>).MakeGenericType(type), null, EqualityComparer));
+                    var lazyMappings = GetMappings(new ParameterizedType(typeof(Lazy<>).MakeGenericType(type), null, _equalityComparer));
                     if (lazyMappings.Count > 0)
                     {
                         object result;
@@ -227,7 +224,7 @@
                 }
                 if (_resolveFunc)
                 {
-                    var funcMappings = GetMappings(new ParameterizedType(typeof(Func<>).MakeGenericType(type), null, EqualityComparer));
+                    var funcMappings = GetMappings(new ParameterizedType(typeof(Func<>).MakeGenericType(type), null, _equalityComparer));
                     if (funcMappings.Count > 0)
                     {
                         object result;
@@ -269,7 +266,7 @@
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
-            this._mappings.TryGetValue(new ParameterizedType(type, null, EqualityComparer), out mappings);
+            this._mappings.TryGetValue(new ParameterizedType(type, null, _equalityComparer), out mappings);
 
             IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
             if (result.Count > 0)

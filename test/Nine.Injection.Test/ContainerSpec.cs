@@ -388,7 +388,7 @@
         public void returns_the_same_instance_when_parameters_equals_using_equality_comparer()
         {
             var a = new Foo();
-            var container = new Container() { EqualityComparer = new CustomEqualityComparer() }.Map<IFoo, Foo>();
+            var container = new Container(new ContainerOptions { EqualityComparer = new CustomEqualityComparer() }).Map<IFoo, Foo>();
             Assert.Equal(container.Get<PerInstanceParameter2>(1), container.Get<PerInstanceParameter2>("1"));
             Assert.Equal(container.Get<PerInstanceParameter2>(1, a), container.Get<PerInstanceParameter2>("1", a));
             Assert.NotEqual(container.Get<PerInstanceParameter2>(2), container.Get<PerInstanceParameter2>("1"));
@@ -402,7 +402,7 @@
             var factory = new Container().Map<IFoo, Foo>().Get<DependsOnPerInstanceParameter>();
             Assert.Null(factory.Factory);
         }
-        
+
         [Fact]
         public void use_func_as_the_factory_to_create_instance_with_custom_parameters()
         {
@@ -437,7 +437,7 @@
             Assert.Equal(1234, new Container()
                 .Map<IPerInstanceParameter, PerInstanceParameter>(1234)
                 .Get<IPerInstanceParameter[]>()[0].Id);
-            
+
             Assert.Equal(1234, new Container()
                 .Map<IPerInstanceParameter, PerInstanceParameter3>("1234")
                 .Get<PerInstanceParameterConsumer>().Id);
