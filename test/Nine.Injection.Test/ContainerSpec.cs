@@ -202,14 +202,6 @@
         }
 
         [Fact]
-        public void func_registration()
-        {
-            var foo = new Foo();
-            Assert.Null(new Container().Map(new Func<IFoo>(() => foo)).Get<Bar>().Foo);
-            Assert.Equal(foo, new Container(new ContainerOptions { ResolveFunc = true }).Map(new Func<IFoo>(() => foo)).Get<Bar>().Foo);
-        }
-
-        [Fact]
         public void func_can_resolve_circular_dependency()
         {
             var ping = new Container(new ContainerOptions { ResolveFunc = true }).Map<IPing, Ping>().Map<IPong, PongFunc>().Get<IPing>();

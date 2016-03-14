@@ -222,19 +222,6 @@
                         }
                     }
                 }
-                if (_resolveFunc)
-                {
-                    var funcMappings = GetMappings(new ParameterizedType(typeof(Func<>).MakeGenericType(type), null, _equalityComparer));
-                    if (funcMappings.Count > 0)
-                    {
-                        object result;
-                        var funcMap = funcMappings[funcMappings.Count - 1];
-                        if (funcMap.TryGetValue(out result) && result != null)
-                        {
-                            return new GetResult { Object = ((Delegate)result).DynamicInvoke(), IsExplicitlyMapped = funcMap.IsExplicit };
-                        }
-                    }
-                }
             }
 
             var instance = Instantiate(type, parameterOverrides);
