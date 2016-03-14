@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.2.0-alpha10",
+  "version": "1.2.2-*",
   "description": "A portable lightweight constructor injection library for singleton objects",
   "authors": [ "Yufei Huang" ],
   "tags": [ "PCL", "Portable", "IOC", "Constructor Injection", "Dependency Injection" ],
@@ -9,6 +9,7 @@
 
   "frameworks": {
     "dnx451": { },
+    "net451": { },
     "dotnet50": {
       "dependencies": {
         "System.Linq": "4.0.0",
@@ -19,17 +20,17 @@
     },
     ".NETPortable,Version=v4.5,Profile=Profile7": {
       "frameworkAssemblies": {
-        "Microsoft.CSharp": "",
-        "System": "",
-        "System.Collections": "",
-        "System.Core": "",
-        "System.IO": "",
-        "System.Linq": "",
-        "System.Reflection": "",
-        "System.Reflection.Extensions": "",
-        "System.Runtime": "",
-        "System.Text.Encoding": "",
-        "System.Threading": ""
+        "Microsoft.CSharp": { "type": "build" },
+        "System": { "type": "build" },
+        "System.Collections": { "type": "build" },
+        "System.Core": { "type": "build" },
+        "System.IO": { "type": "build" },
+        "System.Linq": { "type": "build" },
+        "System.Reflection": { "type": "build" },
+        "System.Reflection.Extensions": { "type": "build" },
+        "System.Runtime": { "type": "build" },
+        "System.Text.Encoding": { "type": "build" },
+        "System.Threading": { "type": "build" }
       }
     }
   }
