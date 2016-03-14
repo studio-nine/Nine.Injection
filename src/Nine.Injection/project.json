@@ -8,16 +8,7 @@
   "licenseUrl": "https://github.com/studio-nine/Nine.Injection/blob/master/LICENSE",
 
   "frameworks": {
-    "dnx451": { },
     "net451": { },
-    "dotnet50": {
-      "dependencies": {
-        "System.Linq": "4.0.0",
-        "System.Reflection.Extensions": "4.0.0",
-        "System.Runtime": "4.0.20",
-        "System.Threading": "4.0.0"
-      }
-    },
     ".NETPortable,Version=v4.5,Profile=Profile7": {
       "frameworkAssemblies": {
         "Microsoft.CSharp": { "type": "build" },
