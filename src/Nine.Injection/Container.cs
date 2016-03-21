@@ -189,7 +189,7 @@
             var parameterizedType = new ParameterizedType(type, parameterOverrides, _equalityComparer);
             var mappings = GetMappings(parameterizedType);
             var hasMapping = mappings.Count > 0;
-            var map = hasMapping ? mappings[mappings.Count - 1] : new TypeMap { From = type };
+            var map = hasMapping ? GetMapping(mappings) : new TypeMap { From = type };
 
             if (hasMapping)
             {
@@ -238,6 +238,19 @@
             }
 
             return new GetResult { Object = instance, IsExplicitlyMapped = map.IsExplicit };
+        }
+
+        private TypeMap GetMapping(List<TypeMap> mappings)
+        {
+            for (var i = mappings.Count - 1; i >= 0; i--)
+            {
+                var mapping = mappings[i];
+                if (mapping.To == null || !_dependencyTracker.Contains(mapping.To))
+                {
+                    return mapping;
+                }
+            }
+            return mappings[0];
         }
 
         /// <inheritdoc />

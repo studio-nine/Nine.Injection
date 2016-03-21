@@ -21,6 +21,15 @@
         }
 
         [Fact]
+        public void map_to_the_same_type_should_chain()
+        {
+            var foo = new Container().Map<IFoo, Foo>().Map<IFoo, ChainFoo1>().Map<IFoo, ChainFoo2>().Get<IFoo>();
+            Assert.IsType<ChainFoo2>(foo);
+            Assert.IsType<ChainFoo1>(((ChainFoo2)foo).Foo);
+            Assert.IsType<Foo>(((ChainFoo1)((ChainFoo2)foo).Foo).Foo);
+        }
+
+        [Fact]
         public void add_then_get_an_instance()
         {
             var foo = new Foo();

@@ -34,6 +34,18 @@
         public WeakFoo2() { InstanceCount++; }
     }
 
+    class ChainFoo1 : IFoo
+    {
+        public IFoo Foo { get; private set; }
+        public ChainFoo1(IFoo foo) { this.Foo = foo; }
+    }
+
+    class ChainFoo2 : IFoo
+    {
+        public IFoo Foo { get; private set; }
+        public ChainFoo2(IFoo foo) { this.Foo = foo; }
+    }
+
     class Bar
     {
         public IFoo Foo { get; private set; }
