@@ -266,22 +266,29 @@
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
-            this._mappings.TryGetValue(new ParameterizedType(type, null, _equalityComparer), out mappings);
+            _mappings.TryGetValue(new ParameterizedType(type, null, _equalityComparer), out mappings);
 
-            IList result = Array.CreateInstance(type, mappings != null ? mappings.Count : 0);
+            if (mappings == null || mappings.Count <= 0) return Array.CreateInstance(type, 0);
+
+            IList result = Array.CreateInstance(type, mappings != null ? mappings.Where(m => m.IsExplicit).Count() : 0);
+
             if (result.Count > 0)
             {
                 object instance;
+
                 for (var i = 0; i < mappings.Count; i++)
                 {
                     var mapping = mappings[i];
-                    if (mapping.TryGetValue(out instance))
+                    if (mapping.IsExplicit)
                     {
-                        result[i] = instance;
-                    }
-                    else
-                    {
-                        result[i] = GetCore(mappings[i].To, mappings[i].DefaultParameterOverrides).Object;
+                        if (mapping.TryGetValue(out instance))
+                        {
+                            result[i] = instance;
+                        }
+                        else
+                        {
+                            result[i] = GetCore(mappings[i].To, mappings[i].DefaultParameterOverrides).Object;
+                        }
                     }
                 }
             }

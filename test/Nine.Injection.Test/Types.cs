@@ -81,6 +81,17 @@
         public ArrayConstructor(IFoo foo, params IFoo[] foos) { this.Foo = foo; this.Foos = foos; }
     }
 
+    class ArrayConstructor2Foo
+    {
+        public ArrayConstructor2Foo(IFoo foo) { }
+    }
+
+    class ArrayConstructor2
+    {
+        public IFoo[] Foos { get; private set; }
+        public ArrayConstructor2(ArrayConstructor2Foo foo, params IFoo[] foos) { this.Foos = foos; }
+    }
+
     class EnumerableConstructor
     {
         public IFoo Foo { get; private set; }

@@ -268,6 +268,14 @@
         }
 
         [Fact]
+        public void do_not_inject_implicitly_mapped_value_for_array_parameter()
+        {
+            var instance = new Container().Get<ArrayConstructor2>();
+            Assert.NotNull(instance);
+            Assert.Empty(instance.Foos);
+        }
+
+        [Fact]
         public void get_should_inject_enumerable_constructor_parameter()
         {
             var instance = new Container().Map<IFoo, Foo>().Map<IFoo, Foo2>().Get<EnumerableConstructor>();
