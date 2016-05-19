@@ -1,3 +1,0 @@
-[submodule "dep/Common"]
-	path = dep/Common
-	url = https://github.com/yufeih/Common
