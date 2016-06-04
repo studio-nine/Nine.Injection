@@ -1,4 +1,4 @@
-# Nine.Injection [![NuGet Version](http://img.shields.io/nuget/v/Nine.Injection.svg)](https://www.nuget.org/packages/Nine.Injection) [![Build status](https://ci.appveyor.com/api/projects/status/k22p5qd8aumwy4xt)](https://ci.appveyor.com/project/yufeih/nine-injection)
+# Nine.Injection [![Build status](https://ci.appveyor.com/api/projects/status/k22p5qd8aumwy4xt)](https://ci.appveyor.com/project/yufeih/nine-injection)
 Nine.Injection is a portable lightweight constructor injection library for singleton objects. 
 
 ## Highlights
