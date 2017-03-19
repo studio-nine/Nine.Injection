@@ -170,7 +170,7 @@
             lock (_syncRoot)
             {
                 _dependencyTracker.Clear();
-                return GetCore(type, null).Object;
+                return GetInternal(type, null).Object;
             }
         }
 
@@ -180,11 +180,26 @@
             lock (_syncRoot)
             {
                 _dependencyTracker.Clear();
-                return GetCore(type, parameterOverrides).Object;
+                return GetInternal(type, parameterOverrides).Object;
             }
         }
 
-        private GetResult GetCore(Type type, object[] parameterOverrides)
+        /// <inheritdoc />
+        public IEnumerable GetAll(Type type)
+        {
+            lock (_syncRoot)
+            {
+                _dependencyTracker.Clear();
+                return GetAllCore(type);
+            }
+        }
+
+        internal object GetCore(Type type, params object[] parameterOverrides)
+        {
+            return GetInternal(type, parameterOverrides).Object;
+        }
+
+        private GetResult GetInternal(Type type, object[] parameterOverrides)
         {
             var parameterizedType = new ParameterizedType(type, parameterOverrides, _equalityComparer);
             var mappings = GetMappings(parameterizedType);
@@ -201,7 +216,7 @@
 
                 if (map.To != type && map.To != null)
                 {
-                    return GetCore(map.To, map.DefaultParameterOverrides);
+                    return GetInternal(map.To, map.DefaultParameterOverrides);
                 }
 
                 parameterOverrides = parameterOverrides ?? map.DefaultParameterOverrides;
@@ -211,14 +226,19 @@
             {
                 if (_resolveLazy)
                 {
-                    var lazyMappings = GetMappings(new ParameterizedType(typeof(Lazy<>).MakeGenericType(type), null, _equalityComparer));
-                    if (lazyMappings.Count > 0)
+                    var lazyType = typeof(Lazy<>).MakeGenericType(type);
+                    if (!_dependencyTracker.Contains(lazyType))
                     {
-                        object result;
-                        var lazyMap = lazyMappings[lazyMappings.Count - 1];
-                        if (lazyMap.TryGetValue(out result) && result != null)
+                        var lazyMappings = GetMappings(new ParameterizedType(lazyType, null, _equalityComparer));
+                        if (lazyMappings.Count > 0)
                         {
-                            return new GetResult { Object = GetLazyValue(result), IsExplicitlyMapped = lazyMap.IsExplicit };
+                            object result;
+                            var lazyMap = lazyMappings[lazyMappings.Count - 1];
+                            if (lazyMap.TryGetValue(out result) && result != null)
+                            {
+                                _dependencyTracker.Add(lazyType);
+                                return new GetResult { Object = GetLazyValue(result), IsExplicitlyMapped = lazyMap.IsExplicit };
+                            }
                         }
                     }
                 }
@@ -253,16 +273,6 @@
             return mappings[0];
         }
 
-        /// <inheritdoc />
-        public IEnumerable GetAll(Type type)
-        {
-            lock (_syncRoot)
-            {
-                _dependencyTracker.Clear();
-                return GetAllCore(type);
-            }
-        }
-
         private IEnumerable GetAllCore(Type type)
         {
             List<TypeMap> mappings;
@@ -287,7 +297,7 @@
                         }
                         else
                         {
-                            result[i] = GetCore(mappings[i].To, mappings[i].DefaultParameterOverrides).Object;
+                            result[i] = GetInternal(mappings[i].To, mappings[i].DefaultParameterOverrides).Object;
                         }
                     }
                 }
@@ -425,7 +435,7 @@
                 else
                 {
                     var parameterType = parameters[i].ParameterType;
-                    var getResult = GetCore(parameterType, null);
+                    var getResult = GetInternal(parameterType, null);
                     if (getResult.IsExplicitlyMapped || !parameters[i].HasDefaultValue || parameters[i].DefaultValue == null)
                     {
                         constructorParams[i] = getResult.Object;

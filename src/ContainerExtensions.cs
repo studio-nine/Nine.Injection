@@ -49,6 +49,22 @@
         }
 
         /// <summary>
+        /// Map an implementation type against an interface or class with parameter overrides.
+        /// </summary>
+        /// <typeparam name="TFrom">The type of interface or class to be registered</typeparam>
+        /// <typeparam name="TTo">The type of concrete class to be instantiated when <typeparamref name="TFrom"/> is resolved from the container.</typeparam>
+        /// <param name="parameterOverrides">A collection of parameters to override when calling the constructor.</param>
+        /// <returns>The container, complete with new registration</returns>
+        public static IContainer MapIf<TFrom, TTo>(this IContainer container, Func<bool> predicate, params object[] parameterOverrides) where TTo : TFrom
+        {
+            if (predicate())
+            {
+                container.Map(typeof(TFrom), typeof(TTo), parameterOverrides);
+            }
+            return container;
+        }
+
+        /// <summary>
         ///  Map all exported types in the assemblies that implements T or derives from T.
         /// </summary>
         /// <returns>The container, complete with new registration</returns>
@@ -136,6 +152,22 @@
         public static IContainer Map<T>(this IContainer container, T instance)
         {
             container.Map(typeof(T), instance);
+            return container;
+        }
+
+        /// <summary>
+        /// Map a specific instance of a concrete implementation for an interface or class
+        /// </summary>
+        /// <param name="container">The container</param>
+        /// <typeparam name="T">The type of interface or class to be registered</typeparam>
+        /// <param name="instance">The instance to register in the container</param>
+        /// <returns>The container, complete with new registration</returns>
+        public static IContainer MapIf<T>(this IContainer container, Func<bool> predicate, Func<T> instance)
+        {
+            if (predicate())
+            {
+                container.Map(typeof(T), instance());
+            }
             return container;
         }
 
